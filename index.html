@@ -1294,7 +1294,7 @@
             return school.logo;
         }
         
-        // 生成学生证
+// 生成学生证
         async function generateCard(firstName, lastName) {
             log(t('generatingCard'), 'info');
             
@@ -1326,11 +1326,29 @@
             ctx.fillStyle = 'white';
             roundRect(ctx, 20, 20, canvas.width - 40, canvas.height - 40, 15);
             
-            // 标题
+            // 标题 (Now School Name)
             ctx.fillStyle = '#003278';
-            ctx.font = 'bold 48px Arial';
+            ctx.font = 'bold 36px Arial'; // Slightly smaller font for long name
             ctx.textAlign = 'center';
-            ctx.fillText('STUDENT CARD', canvas.width / 2, 80);
+            // Wrap the long school name
+            const schoolName = 'Nfe Norddeutscher Fachverband Elektro- Und Informationstechnik E.V. (Hamburg)';
+            const words = schoolName.split(' ');
+            let line = '';
+            let y = 70;
+            for (let n = 0; n < words.length; n++) {
+                let testLine = line + words[n] + ' ';
+                let metrics = ctx.measureText(testLine);
+                let testWidth = metrics.width;
+                if (testWidth > canvas.width - 80 && n > 0) {
+                    ctx.fillText(line, canvas.width / 2, y);
+                    line = words[n] + ' ';
+                    y += 40; // Move to next line
+                } else {
+                    line = testLine;
+                }
+            }
+            ctx.fillText(line, canvas.width / 2, y);
+
             
             // Logo
             const logoUrl = getLogoUrl();
@@ -1341,23 +1359,37 @@
                 
                 await new Promise((resolve, reject) => {
                     logo.onload = () => {
-                        const maxWidth = (canvas.width - 40) * 0.6;
-                        const maxHeight = (canvas.height - 40 - 120) * 0.6;
+                        const maxWidth = (canvas.width - 40) * 0.4; // Smaller logo
+                        const maxHeight = (canvas.height - 40 - 200) * 0.4;
                         const ratio = Math.min(maxWidth / logo.width, maxHeight / logo.height);
                         const newWidth = logo.width * ratio;
                         const newHeight = logo.height * ratio;
                         const logoX = (canvas.width - newWidth) / 2;
-                        const logoY = 150;
+                        const logoY = y + 20; // Position below the school name
                         
                         ctx.drawImage(logo, logoX, logoY, newWidth, newHeight);
                         
                         // 学生信息
-                        const infoY = logoY + newHeight + 40;
+                        const infoY = logoY + newHeight + 50;
                         ctx.fillStyle = 'black';
-                        ctx.font = 'bold 24px Arial';
+                        ctx.font = 'bold 28px Arial';
                         ctx.textAlign = 'center';
                         ctx.fillText(`NAME: ${firstName} ${lastName}`, canvas.width / 2, infoY);
-                        ctx.fillText('VALID BEFORE: 2027/06', canvas.width / 2, infoY + 50);
+                        
+                        // --- START: Added Issue and Valid Dates ---
+                        const dateY = infoY + 60;
+                        ctx.font = '24px Arial';
+                        ctx.fillStyle = '#555'; // Gray color for labels
+                        
+                        // ISSUE Date
+                        ctx.fillText('ISSUE', canvas.width / 2 - 150, dateY);
+                        ctx.fillText('VALID', canvas.width / 2 + 150, dateY);
+                        
+                        ctx.font = 'bold 24px Arial';
+                        ctx.fillStyle = 'black';
+                        ctx.fillText('2025-10-06', canvas.width / 2 - 150, dateY + 30);
+                        ctx.fillText('2029-10-05', canvas.width / 2 + 150, dateY + 30);
+                        // --- END: Added Issue and Valid Dates ---
                         
                         resolve();
                     };
@@ -1368,11 +1400,11 @@
                 log(t('cardGenerated'), 'success');
             } catch (error) {
                 log(`Logo loading failed: ${error.message}`, 'warning');
+                // Fallback rendering if image fails
                 ctx.fillStyle = 'black';
                 ctx.font = 'bold 32px Arial';
                 ctx.textAlign = 'center';
                 ctx.fillText(`NAME: ${firstName} ${lastName}`, canvas.width / 2, 300);
-                ctx.fillText('VALID BEFORE: 2027/06', canvas.width / 2, 360);
             }
         }
         
