@@ -7,552 +7,102 @@
     <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script>
-        // 配置（为空表示关闭该验证功能）
+        // 配置
         window.CONFIG = {
             workerUrl: "https://gemini.irvv.workers.dev",
-            hcaptcha: {
-                sitekey: "" // 留空关闭hCaptcha
-            },
-            turnstile: {
-                sitekey: "" // 留空关闭Turnstile
-            },
-            maxFileSize: 1 * 1024 * 1024 // 1MB
+            hcaptcha: { sitekey: "" },
+            turnstile: { sitekey: "" },
+            maxFileSize: 1 * 1024 * 1024
         };
     </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', 'SF Pro Text', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f3f4f6;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            color: #1a1a1a;
-        }
-        
-        .header {
-            background: #fff0;
-            padding: 35px;
-            text-align: center;
-            position: relative;
-        }
-        
-        .language-selector {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 5px;
-            background: #f0f0f0;
-            padding: 5px;
-            border-radius: 8px;
-        }
-        
-        .lang-btn {
-            padding: 6px 12px;
-            background: transparent;
-            border: none;
-            color: #666;
-            font-size: 13px;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: all 0.2s;
-        }
-        
-        .lang-btn:hover {
-            background: #e0e0e0;
-            color: #333;
-        }
-        
-        .lang-btn.active {
-            background: #1a1a1a;
-            color: #fff;
-        }
-        
-        .main-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            max-width: 1200px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 20px;
-            gap: 20px;
-        }
-        
-        .input-section {
-            background: #fff;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        
-        .url-input {
-            width: 100%;
-            padding: 16px 20px;
-            font-size: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            transition: all 0.2s;
-            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
-            background: #fafafa;
-        }
-        
-        .url-input:focus {
-            outline: none;
-            border-color: #666;
-            background: #fff;
-        }
-        
-        .verify-button {
-            margin-top: 15px;
-            width: 100%;
-            padding: 14px;
-            background: #1a1a1a;
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .verify-button:hover:not(:disabled) {
-            background: #333;
-            transform: translateY(-1px);
-        }
-        
-        .verify-button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        
-        .advanced-toggle {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
-            text-align: center;
-        }
-        
-        .toggle-button {
-            background: none;
-            border: none;
-            color: #666;
-            font-size: 14px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .advanced-settings {
-            display: none;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #f0f0f0;
-        }
-        
-        .advanced-settings.show {
-            display: block;
-        }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .form-group label {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 6px;
-            font-weight: 500;
-        }
-        
-        .form-group input,
-        .form-group select {
-            padding: 10px 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            background: #fafafa;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1000;
-        }
-        
-        .modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-        }
-        
-        .modal-content {
-            position: relative;
-            background: #fff;
-            border-radius: 16px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 90vh;
-            overflow: auto;
-        }
-        
-        .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-title {
-            font-size: 18px;
-            font-weight: 600;
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #999;
-            cursor: pointer;
-        }
-        
-        .modal-body {
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .modal-canvas {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-        }
-        
-        .modal-footer {
-            padding: 20px;
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-        
-        .modal-button {
-            padding: 10px 24px;
-            border-radius: 8px;
-            border: none;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .modal-button-primary {
-            background: #1a1a1a;
-            color: #fff;
-        }
-
-        .modal-button-secondary {
-            background: #f0f0f0;
-            color: #666;
-        }
-        
-        .console-section {
-            background: #1a1a1a;
-            border-radius: 12px;
-            padding: 0;
-            overflow: hidden;
-            min-height: 300px;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .console-header {
-            background: #2a2a2a;
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #333;
-        }
-        
-        .console-title {
-            font-size: 13px;
-            color: #999;
-            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
-        }
-        
-        .console-body {
-            flex: 1;
-            padding: 16px;
-            overflow-y: auto;
-            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
-            font-size: 13px;
-            line-height: 1.6;
-        }
-        
-        .console-line {
-            margin-bottom: 8px;
-            display: flex;
-            gap: 8px;
-        }
-        
-        .console-time {
-            color: #666;
-        }
-        
-        .console-content {
-            flex: 1;
-            word-break: break-word;
-        }
-        
-        .console-info { color: #5ac8fa; }
-        .console-success { color: #4cd964; }
-        .console-error { color: #ff3b30; }
-
-        .footer {
-            color: #999;
-            padding: 20px;
-            text-align: center;
-            margin-top: auto;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f3f4f6; margin: 0; }
+        .main-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .input-section { background: #fff; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-size: 13px; color: #666; margin-bottom: 6px; font-weight: 500; }
+        .form-group input, .form-group select { padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; }
+        .url-input { width: 100%; padding: 16px 20px; font-size: 15px; border: 2px solid #e0e0e0; border-radius: 12px; }
+        .verify-button { margin-top: 15px; width: 100%; padding: 14px; background: #1a1a1a; color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal.show { display: flex; }
+        .modal-content { background: white; padding: 20px; border-radius: 16px; max-width: 600px; width: 90%; text-align: center; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e0e0; padding-bottom: 10px; margin-bottom: 20px; }
+        .modal-title { font-size: 18px; font-weight: 600; }
+        .modal-close { font-size: 24px; border: none; background: none; cursor: pointer; }
+        .modal-footer { margin-top: 20px; display: flex; gap: 10px; justify-content: center; }
+        .modal-button { padding: 10px 24px; border-radius: 8px; border: none; font-size: 14px; cursor: pointer; }
+        .modal-button-primary { background: #1a1a1a; color: #fff; }
+        .modal-button-secondary { background: #f0f0f0; color: #666; }
+        .console-section { background: #1a1a1a; color: #fff; border-radius: 12px; min-height: 200px; padding: 16px; font-family: monospace; overflow-y: auto; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="language-selector">
-            <button class="lang-btn active" onclick="setLanguage('zh-CN')">简体</button>
-            <button class="lang-btn" onclick="setLanguage('en')">English</button>
-        </div>
-    </div>
-    
     <div class="main-container">
         <div class="input-section">
-            <div class="url-input-container">
-                <input type="text" 
-                       id="urlInput" 
-                       class="url-input" 
-                       placeholder="https://services.sheerid.com/verify/..."
-                       autocomplete="off">
-            </div>
-            
-            <button class="verify-button" id="verifyButton" onclick="startVerification()">
-                <span data-i18n="startVerify">开始验证</span>
-            </button>
-            
-            <div class="advanced-toggle">
-                <button class="toggle-button" onclick="toggleAdvanced()">
-                    <span data-i18n="advancedSettings">高级设置</span>
-                </button>
-            </div>
-            
-            <div class="advanced-settings" id="advancedSettings">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label data-i18n="firstName">名字</label>
-                        <input type="text" id="firstName">
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="lastName">姓氏</label>
-                        <input type="text" id="lastName">
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="email">邮箱</label>
-                        <input type="email" id="email">
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="birthDate">生日</label>
-                        <input type="date" id="birthDate">
-                    </div>
-                    <div class="form-group">
-                        <label>学号 (Student ID)</label>
-                        <input type="text" id="studentId" value="INT853252">
-                    </div>
-                    <div class="form-group">
-                        <label>专业 (Faculty)</label>
-                        <input type="text" id="faculty" value="Mechanical Eng.">
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="school">学校</label>
-                        <select id="schoolId" onchange="updateEmailDomain()">
-                            <option value="nfe">Nfe Norddeutscher</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="customLogoUrl">自定义Logo URL (可选)</label>
-                        <input type="text" id="customLogoUrl" placeholder="">
-                    </div>
-                </div>
+            <input type="text" id="urlInput" class="url-input" placeholder="粘贴 SheerID 验证链接...">
+            <button class="verify-button" onclick="startVerification()">开始验证</button>
+            <div class="form-grid" style="margin-top: 20px;">
+                <div class="form-group"><label>名字 (First Name)</label><input type="text" id="firstName"></div>
+                <div class="form-group"><label>姓氏 (Last Name)</label><input type="text" id="lastName"></div>
+                <div class="form-group"><label>邮箱 (Email)</label><input type="email" id="email"></div>
+                <div class="form-group"><label>生日 (Birth Date)</label><input type="date" id="birthDate"></div>
+                <div class="form-group"><label>学号 (Student ID)</label><input type="text" id="studentId" value="INT731320"></div>
+                <div class="form-group"><label>专业 (Faculty)</label><input type="text" id="faculty" value="Medicine"></div>
+                <div class="form-group"><label>学校 (School)</label><select id="schoolId"><option value="nfe">Nfe Norddeutscher</option></select></div>
+                <div class="form-group"><label>自定义Logo (可选)</label><input type="text" id="customLogoUrl"></div>
             </div>
         </div>
-        
-        <div class="console-section">
-            <div class="console-header">
-                <div class="console-title">控制台</div>
-            </div>
-            <div class="console-body" id="consoleBody"></div>
-        </div>
+        <div class="console-section" id="consoleBody"></div>
     </div>
-    
-    <div class="footer">
-        <div>2025 SheerID Verifier</div>
-    </div>
-    
+
     <div class="modal" id="previewModal">
-        <div class="modal-overlay" onclick="closeModal()"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <span class="modal-title" data-i18n="studentCardPreview">学生证预览</span>
+                <span class="modal-title">学生证预览</span>
                 <button class="modal-close" onclick="closeModal()">×</button>
             </div>
             <div class="modal-body">
-                <p data-i18n="confirmInfo">请确认学生证信息是否正确</p>
-                <canvas id="studentCard" class="modal-canvas"></canvas>
+                <p>请确认学生证信息是否正确</p>
+                <canvas id="studentCard"></canvas>
             </div>
             <div class="modal-footer">
-                <button class="modal-button modal-button-secondary" onclick="closeModal()" data-i18n="cancel">取消</button>
-                <button class="modal-button modal-button-primary" onclick="confirmAndSubmit()" data-i18n="confirmSubmit">确认并提交</button>
+                <button class="modal-button modal-button-secondary" onclick="closeModal()">取消</button>
+                <button class="modal-button modal-button-primary" onclick="confirmAndSubmit()">确认并提交</button>
             </div>
         </div>
     </div>
 
     <script>
-        const translations = {
-            'zh-CN': {
-                startVerify: '开始验证',
-                advancedSettings: '高级设置',
-                firstName: '名字',
-                lastName: '姓氏',
-                email: '邮箱',
-                birthDate: '生日',
-                school: '学校',
-                customLogoUrl: '自定义Logo URL (可选)',
-                studentCardPreview: '学生证预览',
-                confirmInfo: '请确认学生证信息是否正确',
-                cancel: '取消',
-                confirmSubmit: '确认并提交',
-                generatingCard: '正在生成学生证...',
-                cardGenerated: '学生证生成成功',
-            },
-            'en': {
-                startVerify: 'Start Verification',
-                advancedSettings: 'Advanced Settings',
-                // ... other English translations
-            }
-        };
-        
-        function setLanguage(lang) {
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (translations[lang] && translations[lang][key]) {
-                    el.textContent = translations[lang][key];
-                }
-            });
-        }
-        
         const schools = {
             'nfe': {
                 name: 'Nfe Norddeutscher Fachverband\nElektro- Und Informationstechnik\nE.V. (Hamburg)',
-                idExtended: 'nfe_id',
                 domain: 'nfe.edu',
                 logo: 'assets/nfe.png'
             },
         };
 
-        function log(message, type = 'info') {
+        function log(message) {
             const consoleBody = document.getElementById('consoleBody');
-            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
-            const line = document.createElement('div');
-            line.className = 'console-line';
-            line.innerHTML = `<span class="console-time">[${time}]</span> <span class="console-content console-${type}">${message}</span>`;
-            consoleBody.appendChild(line);
+            consoleBody.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${message}</div>`;
             consoleBody.scrollTop = consoleBody.scrollHeight;
-        }
-
-        function toggleAdvanced() {
-            document.getElementById('advancedSettings').classList.toggle('show');
-        }
-
-        const nameGenerator = {
-            generate() {
-                // Abridged for brevity
-                const first = ['Adam', 'Ben', 'Carl', 'Dave'][Math.floor(Math.random() * 4)];
-                const last = ['Smith', 'Jones', 'Williams', 'Brown'][Math.floor(Math.random() * 4)];
-                return { firstName: first, lastName: last };
-            }
-        };
-
-        function generateEmail() {
-            const school = schools[document.getElementById('schoolId').value];
-            return `test${Math.floor(Math.random()*1000)}@${school.domain}`;
-        }
-
-        function generateBirthDate() {
-            return '2002-05-15';
-        }
-
-        function updateEmailDomain() {
-            // Logic to update email domain
-        }
-
-        function initializeDefaults() {
-            const name = nameGenerator.generate();
-            document.getElementById('firstName').value = name.firstName;
-            document.getElementById('lastName').value = name.lastName;
-            document.getElementById('email').value = generateEmail();
-            document.getElementById('birthDate').value = generateBirthDate();
-        }
-
-        function parseUrl(url) {
-            const match = url.match(/verificationId=([a-f0-9]+)/i);
-            return match ? match[1] : null;
         }
 
         function getLogoUrl() {
             const customUrl = document.getElementById('customLogoUrl').value.trim();
             if (customUrl) return customUrl;
-            const school = schools[document.getElementById('schoolId').value];
-            return school.logo;
+            return schools[document.getElementById('schoolId').value].logo;
         }
-
+        
         async function generateCard(firstName, lastName, studentId, faculty, school) {
-            log(translations['zh-CN'].generatingCard, 'info');
-
+            log('正在生成学生证...');
             const canvas = document.getElementById('studentCard');
             const ctx = canvas.getContext('2d');
-
             canvas.width = 500;
             canvas.height = 310;
-
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
             ctx.fillStyle = 'white';
             ctx.strokeStyle = '#e5e7eb';
             ctx.lineWidth = 2;
@@ -560,21 +110,18 @@
             ctx.roundRect(10, 10, canvas.width - 20, canvas.height - 20, 12);
             ctx.fill();
             ctx.stroke();
-
             ctx.fillStyle = '#dc2626';
             ctx.beginPath();
             ctx.roundRect(10, 10, canvas.width - 20, 75, [12, 12, 0, 0]);
             ctx.fill();
 
-            const loadImage = (src) => {
-                return new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.crossOrigin = 'anonymous';
-                    img.onload = () => resolve(img);
-                    img.onerror = (err) => reject(new Error(`Failed to load image: ${src}`));
-                    img.src = src;
-                });
-            };
+            const loadImage = (src) => new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+                img.src = src;
+            });
 
             try {
                 const logo = await loadImage(getLogoUrl());
@@ -583,8 +130,11 @@
                 ctx.roundRect(30, 22, 50, 50, 8);
                 ctx.fill();
                 ctx.drawImage(logo, 35, 27, 40, 40);
+                
+                // --- 这是关键的修复 ---
+                const avatar = await loadImage('assets/avatar.png'); 
+                // --- 结束修复 ---
 
-                const avatar = await loadImage('https://i.imgur.com/8l5vG5v.png');
                 ctx.beginPath();
                 ctx.roundRect(30, 105, 90, 90, 8);
                 ctx.clip();
@@ -595,15 +145,11 @@
                 ctx.font = 'bold 16px "Segoe UI", Arial, sans-serif';
                 ctx.textAlign = 'left';
                 const schoolNameLines = school.name.split('\n');
-                schoolNameLines.forEach((line, index) => {
-                    ctx.fillText(line, 95, 40 + (index * 18));
-                });
-                
+                schoolNameLines.forEach((line, index) => ctx.fillText(line, 95, 38 + (index * 18)));
                 ctx.font = '11px "Segoe UI", Arial, sans-serif';
                 ctx.fillText('INTERNATIONAL STUDENT ID CARD', 95, 75);
 
                 ctx.fillStyle = 'black';
-                ctx.textAlign = 'left';
                 ctx.font = 'bold 20px "Segoe UI", Arial, sans-serif';
                 ctx.fillText('NAME:', 140, 130);
                 ctx.fillText('STUDENT ID:', 140, 160);
@@ -633,13 +179,11 @@
                 const validDate = new Date(issueDate);
                 validDate.setFullYear(issueDate.getFullYear() + 4);
                 const formatDate = (date) => date.toISOString().split('T')[0];
-
                 ctx.fillText(formatDate(issueDate), canvas.width * 0.25 + 10, 275);
                 ctx.fillText(formatDate(validDate), canvas.width * 0.75 - 10, 275);
-
-                log(translations['zh-CN'].cardGenerated, 'success');
+                log('学生证生成成功。');
             } catch (error) {
-                log(`Image loading failed: ${error.message}`, 'error');
+                log(`错误: ${error.message}`);
             }
         }
 
@@ -647,39 +191,28 @@
         function closeModal() { document.getElementById('previewModal').classList.remove('show'); }
 
         async function startVerification() {
-            const urlInput = document.getElementById('urlInput').value.trim();
-            if (!urlInput) {
-                log('Please enter a URL', 'error');
-                return;
-            }
-
-            const verificationId = parseUrl(urlInput);
-            if (!verificationId) {
-                log('Invalid verification ID in URL', 'error');
-                return;
-            }
-            
             const firstName = document.getElementById('firstName').value;
             const lastName = document.getElementById('lastName').value;
             const studentId = document.getElementById('studentId').value;
             const faculty = document.getElementById('faculty').value;
             const school = schools[document.getElementById('schoolId').value];
-
             await generateCard(firstName, lastName, studentId, faculty, school);
-            
             showModal();
         }
-        
-        async function confirmAndSubmit() {
-            // Abridged for brevity
+
+        function confirmAndSubmit() { 
+            // This would contain the logic to submit the form data
             closeModal();
-            log('Verification submitted (simulated)', 'success');
+            log('已确认并提交 (功能待实现)');
         }
 
-        window.onload = function() {
-            initializeDefaults();
-            setLanguage('zh-CN');
-            log('System ready.', 'info');
+        window.onload = () => {
+            // Set default values
+            document.getElementById('firstName').value = "SODT";
+            document.getElementById('lastName').value = "XIVWIO";
+            document.getElementById('email').value = "test@nfe.edu";
+            document.getElementById('birthDate').value = "2002-01-01";
+            log('系统就绪。');
         };
     </script>
 </body>
