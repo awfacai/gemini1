@@ -3,232 +3,1747 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Document Generator</title>
+    <title>SheerID Verifier</title>
+    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script>
+        // 配置（为空表示关闭该验证功能）
+        window.CONFIG = {
+            workerUrl: "https://gemini.irvv.workers.dev/",
+            hcaptcha: {
+                sitekey: "" // 留空关闭hCaptcha
+            },
+            turnstile: {
+                sitekey: "" // 留空关闭Turnstile
+            },
+            maxFileSize: 1 * 1024 * 1024 // 1MB
+        };
+    </script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f3f4f6; margin: 0; display: flex; justify-content: center; align-items: flex-start; padding-top: 2rem; }
-        .main-container { max-width: 1200px; width: 100%; display: grid; grid-template-columns: 1fr; gap: 2rem; }
-        @media (min-width: 1024px) { .main-container { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        .card { background: #fff; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); }
-        .card-title { font-size: 1.25rem; font-weight: 600; margin: 0 0 1.5rem 0; }
-        .form-group { margin-bottom: 1rem; }
-        .form-group label { display: block; font-size: 0.875rem; color: #4b5563; margin-bottom: 0.5rem; font-weight: 500; }
-        .form-group input, .form-group select { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem; box-sizing: border-box; }
-        .button { width: 100%; padding: 0.75rem; border: none; border-radius: 0.5rem; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
-        .button-primary { background: #1f2937; color: #fff; }
-        .button-primary:hover { background: #374151; }
-        .button-secondary { background: #4f46e5; color: #fff; margin-top: 1rem; }
-        .button-secondary:hover { background: #4338ca; }
-        .preview-placeholder { text-align: center; color: #6b7280; padding: 4rem 0; border: 2px dashed #d1d5db; border-radius: 0.75rem; }
-        #studentCard { max-width: 100%; border-radius: 0.5rem; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'SF Pro Text', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #450606;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #1a1a1a;
+        }
+        
+        .header {
+            background: #fff0;
+            padding: 35px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
+        }
+        
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 5px;
+            background: #f0f0f0;
+            padding: 5px;
+            border-radius: 8px;
+        }
+        
+        .lang-btn {
+            padding: 6px 12px;
+            background: transparent;
+            border: none;
+            color: #666;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        .lang-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .lang-btn.active {
+            background: #1a1a1a;
+            color: #fff;
+        }
+        
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        .input-section {
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .url-input-container {
+            position: relative;
+        }
+        
+        .url-input {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            transition: all 0.2s;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            background: #fafafa;
+        }
+        
+        .url-input:focus {
+            outline: none;
+            border-color: #666;
+            background: #fff;
+        }
+        
+        .url-input::placeholder {
+            color: #999;
+        }
+        
+        .verify-button {
+            margin-top: 15px;
+            width: 100%;
+            padding: 14px;
+            background: #1a1a1a;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .verify-button:hover:not(:disabled) {
+            background: #333;
+            transform: translateY(-1px);
+        }
+        
+        .verify-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .advanced-toggle {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+        }
+        
+        .toggle-button {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        
+        .toggle-button:hover {
+            color: #1a1a1a;
+        }
+        
+        .toggle-button svg {
+            width: 16px;
+            height: 16px;
+            transition: transform 0.2s;
+        }
+        
+        .toggle-button.active svg {
+            transform: rotate(180deg);
+        }
+        
+        .advanced-settings {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .advanced-settings.show {
+            display: block;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fafafa;
+            transition: all 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #666;
+            background: #fff;
+        }
+        
+        /* 成功提示模态框样式 */
+        .success-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3000;
+            animation: fadeIn 0.3s;
+        }
+        
+        .success-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .success-modal-content {
+            position: relative;
+            background: #fff;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: #4cd964;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: scaleIn 0.5s;
+        }
+        
+        .success-icon svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
+        
+        .success-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+        
+        .success-message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .success-redirect-url {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 20px;
+            word-break: break-all;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-family: monospace;
+        }
+        
+        .success-button {
+            padding: 12px 30px;
+            background: #4cd964;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .success-button:hover {
+            background: #35c74a;
+            transform: translateY(-1px);
+        }
+        
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+        
+        /* 验证码模态框样式 */
+        .captcha-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2000;
+            animation: fadeIn 0.3s;
+        }
+        
+        .captcha-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .captcha-modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+        }
+        
+        .captcha-modal-content {
+            position: relative;
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s;
+            text-align: center;
+        }
+        
+        .captcha-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+        }
+        
+        .captcha-status {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .captcha-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            min-height: 78px;
+        }
+        
+        .captcha-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        
+        .captcha-close:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-content {
+            position: relative;
+            background: #fff;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        
+        .modal-close:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .modal-body {
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .modal-canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+        }
+        
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .modal-button {
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .modal-button-primary {
+            background: #1a1a1a;
+            color: #fff;
+        }
+        
+        .modal-button-primary:hover {
+            background: #333;
+            transform: translateY(-1px);
+        }
+        
+        .modal-button-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+        
+        .modal-button-secondary:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .console-section {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .console-header {
+            background: #2a2a2a;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+        
+        .console-title {
+            font-size: 13px;
+            color: #999;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .console-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4cd964;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .console-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .console-btn {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .console-btn:hover {
+            color: #999;
+            background: #333;
+        }
+        
+        .console-body {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        
+        .console-line {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        
+        .console-time {
+            color: #666;
+            flex-shrink: 0;
+        }
+        
+        .console-content {
+            flex: 1;
+            word-break: break-word;
+        }
+        
+        .console-log { color: #999; }
+        .console-info { color: #5ac8fa; }
+        .console-success { color: #4cd964; }
+        .console-warning { color: #ffcc00; }
+        .console-error { color: #ff3b30; }
+        .console-debug { color: #8e8e93; }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #333;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        .loading-spinner.white {
+            border-color: #fff;
+            border-top-color: transparent;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            background: #1a1a1a;
+            color: #999;
+            padding: 20px;
+            text-align: center;
+            margin-top: auto;
+            border-top: 1px solid #333;
+        }
+        
+        .footer a {
+            color: #5ac8fa;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .footer a:hover {
+            color: #87ceeb;
+            text-decoration: underline;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-container {
+                padding: 15px;
+            }
+            
+            .language-selector {
+                position: static;
+                margin-top: 10px;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <div class="card">
-            <h2 class="card-title">🎛️ Controls</h2>
-            <div class="form-group">
-                <label for="schoolId">University</label>
-                <select id="schoolId"></select>
-            </div>
-            <div class="form-group">
-                <label for="firstName">First Name</label>
-                <input type="text" id="firstName">
-            </div>
-            <div class="form-group">
-                <label for="lastName">Last Name</label>
-                <input type="text" id="lastName">
-            </div>
-            <div class="form-group">
-                <label for="studentId">Student ID</label>
-                <input type="text" id="studentId">
-            </div>
-            <div class="form-group">
-                <label for="faculty">Faculty / Major</label>
-                <input type="text" id="faculty">
-            </div>
-            <div class="form-group">
-                <label for="photoUpload">Student Photo</label>
-                <input type="file" id="photoUpload" accept="image/*">
-            </div>
-            <button class="button button-primary" onclick="generateAndShowCard()">Generate Student ID</button>
-            <button class="button button-secondary" onclick="generateRandom()">🎲 One-Click Random</button>
+    <div class="header">
+        <div class="language-selector">
+            <button class="lang-btn active" onclick="setLanguage('zh-CN')">简体</button>
+            <button class="lang-btn" onclick="setLanguage('zh-TW')">繁體</button>
+            <button class="lang-btn" onclick="setLanguage('en')">English</button>
+            <button class="lang-btn" onclick="setLanguage('ja')">日本語</button>
+            <button class="lang-btn" onclick="setLanguage('de')">Deutsch</button>
         </div>
-
-        <div class="card">
-            <h2 class="card-title">🖼️ Preview</h2>
-            <div id="preview-placeholder" class="preview-placeholder">
-                <p>Your generated ID card will appear here.</p>
+    </div>
+    
+    <div class="main-container">
+        <div class="input-section">
+            <div class="url-input-container">
+                <input type="text" 
+                       id="urlInput" 
+                       class="url-input" 
+                       placeholder="https://services.sheerid.com/verify/67c8c14f5f17a83b745e3f82/?verificationId=689c96eexxxxxxxx"
+                       autocomplete="off">
             </div>
-            <div id="preview-container" style="display: none;">
-                 <canvas id="studentCard"></canvas>
-                 <button class="button button-secondary" onclick="downloadCard()">⬇️ Download as PNG</button>
+            
+            <button class="verify-button" id="verifyButton" onclick="startVerification()">
+                <span data-i18n="startVerify">开始验证</span>
+            </button>
+            
+            <div class="advanced-toggle">
+                <button class="toggle-button" onclick="toggleAdvanced()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                    <span data-i18n="advancedSettings">高级设置</span>
+                </button>
+            </div>
+            
+            <div class="advanced-settings" id="advancedSettings">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label data-i18n="firstName">名字</label>
+                        <input type="text" id="firstName">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="lastName">姓氏</label>
+                        <input type="text" id="lastName">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="email">邮箱</label>
+                        <input type="email" id="email">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="birthDate">生日</label>
+                        <input type="date" id="birthDate">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="school">学校</label>
+                        <select id="schoolId" onchange="updateEmailDomain()">
+                            <option value="1953">nfe</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="customLogoUrl">自定义Logo URL (可选)</label>
+                        <input type="text" id="customLogoUrl" placeholder="">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="console-section">
+            <div class="console-header">
+                <div class="console-title">
+                    <span class="console-status"></span>
+                    <span data-i18n="console">控制台</span>
+                </div>
+                <div class="console-actions">
+                    <button class="console-btn" onclick="clearConsole()" data-i18n="clear">清除</button>
+                    <button class="console-btn" onclick="exportLogs()" data-i18n="export">导出</button>
+                </div>
+            </div>
+            <div class="console-body" id="consoleBody">
+                <div class="console-line">
+                    <span class="console-time">[00:00:00]</span>
+                    <span class="console-content console-info" data-i18n="systemReady">系统就绪，等待输入...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <div>2025 SheerID Verifier</div>
+        <div class="footer-links">
+            <a href="https://linux.do" target="_blank">LinuxDo</a>
+            <a href="#" onclick="showAbout(); return false;" data-i18n="about">关于</a>
+        </div>
+    </div>
+    
+    <!-- 成功提示模态框 -->
+    <div class="success-modal" id="successModal">
+        <div class="success-modal-content">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                </svg>
+            </div>
+            <div class="success-title" data-i18n="successTitle">验证成功！</div>
+            <div class="success-message" data-i18n="successMessage">您的学生身份已成功验证</div>
+            <div class="success-redirect-url" id="successRedirectUrl"></div>
+            <button class="success-button" onclick="redirectToSuccess()" data-i18n="goToSuccessPage">前往成功页面</button>
+        </div>
+    </div>
+    
+    <!-- 验证码模态框 -->
+    <div class="captcha-modal" id="captchaModal">
+        <div class="captcha-modal-overlay" onclick="closeCaptchaModal()"></div>
+        <div class="captcha-modal-content">
+            <button class="captcha-close" onclick="closeCaptchaModal()">×</button>
+            <div class="captcha-title" id="captchaTitle" data-i18n="completeCaptcha">请完成人机验证</div>
+            <div class="captcha-status" id="captchaStatus"></div>
+            <div class="captcha-container">
+                <div id="hcaptcha-container"></div>
+                <div id="turnstile-container"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 学生证预览模态框 -->
+    <div class="modal" id="previewModal">
+        <div class="modal-overlay" onclick="closeModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title" data-i18n="studentCardPreview">学生证预览</span>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="color: #666; font-size: 14px; margin-bottom: 10px;" data-i18n="confirmInfo">请确认学生证信息是否正确</p>
+                <canvas id="studentCard" class="modal-canvas"></canvas>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button modal-button-secondary" onclick="closeModal()" data-i18n="cancel">取消</button>
+                <button class="modal-button modal-button-primary" onclick="confirmAndSubmit()" data-i18n="confirmSubmit">确认并提交</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- DATA AND CONFIGURATION ---
-        const schools = {
-            'nfe': {
-                name: 'Nfe Norddeutscher Fachverband\nElektro- Und Informationstechnik\nE.V. (Hamburg)',
-                logo: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAYFBMVEX///8BAQEAAAD8/PwICAgKCgrf39/5+fn19fU8PDxAQECurq5PT08xMTGJiYnDw8NfX1+EhISVlZWTk5NxcXFGRkbj4+NtbW1paWmBgYFAQD9ra2w3NzfOzs54eHhISEh/f5R2AAABnElEQVR4nO3dy1LCQBSF4ZCIh4qgAt4U8P+/s5JCIJ25N2fu8NzdpcsJm9nOhgEAAAAAAAAAAAAAAAAAAAAAAACA4lLa2/f3b1/H8+t7/y9G65pL93Wc5n/9/h73f5t3/sPZ3PzcvD+e75/Pz4/H8+r09fH8G5/j8/12/P70/f7v+N1+ft5/j18/P9/3/Te/j4/ny/T9/nf8f/583v+P/8/n++X5f//3/f98vp+nv4+f7+f5//5x//b3s5n9fP583n/1T18/3/cf+tL+fP5+fP5r/8/n+339fP9+v68/5n/290//fwEAAAAAAAAAAAAAAAAAAAAAAMC/0v/89P3+7/j96/v5vP/eT6f/j/8f/38+3++/5/f7/fN+P7/+PZ/v5/n+/fN+v37+fn++n+f79eP5fv38/Hw/z/frx/P9+vH8fP98P8/368fz/fp4fp/v18fz/Xo+37+fz/f79fN5f1+/n/0+P3+/vt/f75+Pz/f7+fn8/f7r+30BAAAAAAAAAAAAAAAAAAAAAAD4pT893CM+9jYyAAAAAElFTkSuQmCC'
+        // i18n 翻译配置
+        const translations = {
+            'zh-CN': {
+                title: 'SheerID 验证器',
+                startVerify: '开始验证',
+                advancedSettings: '高级设置',
+                firstName: '名字',
+                lastName: '姓氏',
+                email: '邮箱',
+                birthDate: '生日',
+                school: '学校',
+                customLogoUrl: '自定义Logo URL (可选)',
+                customLogoPlaceholder: '留空使用学校默认Logo',
+                console: '控制台',
+                clear: '清除',
+                export: '导出',
+                systemReady: '系统就绪，等待输入...',
+                about: '关于',
+                successTitle: '验证成功！',
+                successMessage: '您的学生身份已成功验证',
+                goToSuccessPage: '前往成功页面',
+                completeCaptcha: '请完成人机验证',
+                studentCardPreview: '学生证预览',
+                confirmInfo: '请确认学生证信息是否正确',
+                cancel: '取消',
+                confirmSubmit: '确认并提交',
+                verifying: '验证中...',
+                pleaseEnterUrl: '请输入验证URL',
+                invalidUrlFormat: '无效的验证ID格式',
+                captchaStep1: '请完成第一步验证 (hCaptcha)',
+                captchaStep2: '请完成第二步验证 (Turnstile)',
+                loadingCaptcha: '正在加载验证码...',
+                captchaComplete: '验证完成！',
+                generatingCard: '正在生成学生证...',
+                cardGenerated: '学生证生成成功',
+                verificationSuccess: '✅ 验证成功！跳转URL: ',
+                verificationFailed: '❌ 验证失败: '
             },
-            'mit': {
-                name: 'Massachusetts Institute\nof Technology (MIT)',
-                logo: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAb1BMVEX///8yMjImJiby8vImJiby8vL8/Pzz8/P5+fn19fUtLS0tLS35+fnz8/P19fX8/PwhISEhISGfn5+fn58/Pz/AwMDDw8N7e3t7e3vAwMB/f3+Pj4+tra2goKCUlJSysrLAwMCQkJBEREQ/Pz9/f3+goKCysrKUlJSurq4AAACaB0soAAACjElEQVR4nO3d61LbQBSF4RImQjGgKOLGo95P9v5vU9o13S2lR2daxlD2PrtAcX0LMpPMZgAAAAAAAAAAAAAAAAAAAAAAAPA/tTfrXf/28/X1/Hk/P981r827f3w+P5/P7/dH41rN/c5sP18/P9/P8+v18/n5fP/3f30/Xy+/15/N58/n+339/Pj1/Xw/3y/f7+v7+Xw/36+f7+fr/Xy/Xj+fr+f79fN8v37t/eO/s/18vx6/33+vj1+vH8/3+33+fnw/X+/n++Xz/f7v/Wf+z3739P/+AIAAAAAAAAAAAAAAAAAAAAAYB/pX/7/9f2+fr5e/57Xp//t+Xn+fP5+v5/v9/Pj+ft8v16/H8/36+fz8/n8/Hw/z/drx/P9+nH9fr9eP57v14/n+/Xz+X59v349n+/Xj+f79fN5/369fp7Pj1+vP5+f7/f7+X79fN7/eD5fP5/v9/P9+vl+/fH5fAAAAAAAAAAAAAAAAAAAAAAA+Lt+9t4+N0P2d+N7/3w+X2+P7/f74/n+eP1+vN8ev95/d38+H+9/+/v7+3w/3+9fv3b/eD4/nh+/nh+vX7s/P56v7+eP+ffn+3w/369fuz+e7/f74/l+v94/3+9fv3Z/PN/vj8f3+/3x/Pf8/ng+n+/Xj+f7/X5+vX5+PZ/v16/Pz+fH8/2/fn7+fr8+nt/P5+v79fP9+vN+fX4+v59f/7o/9A8AAAAAAAAAAAAAAAAAAAAAAAD4v/wA2J5qTz4A+U0AAAAASUVORK5CYII='
+            'zh-TW': {
+                title: 'SheerID 驗證器',
+                startVerify: '開始驗證',
+                advancedSettings: '進階設定',
+                firstName: '名字',
+                lastName: '姓氏',
+                email: '電子郵件',
+                birthDate: '生日',
+                school: '學校',
+                customLogoUrl: '自訂Logo URL (選填)',
+                customLogoPlaceholder: '留空使用學校預設Logo',
+                console: '控制台',
+                clear: '清除',
+                export: '匯出',
+                systemReady: '系統就緒，等待輸入...',
+                about: '關於',
+                successTitle: '驗證成功！',
+                successMessage: '您的學生身份已成功驗證',
+                goToSuccessPage: '前往成功頁面',
+                completeCaptcha: '請完成人機驗證',
+                studentCardPreview: '學生證預覽',
+                confirmInfo: '請確認學生證資訊是否正確',
+                cancel: '取消',
+                confirmSubmit: '確認並提交',
+                verifying: '驗證中...',
+                pleaseEnterUrl: '請輸入驗證URL',
+                invalidUrlFormat: '無效的驗證ID格式',
+                captchaStep1: '請完成第一步驗證 (hCaptcha)',
+                captchaStep2: '請完成第二步驗證 (Turnstile)',
+                loadingCaptcha: '正在載入驗證碼...',
+                captchaComplete: '驗證完成！',
+                generatingCard: '正在生成學生證...',
+                cardGenerated: '學生證生成成功',
+                verificationSuccess: '✅ 驗證成功！跳轉URL: ',
+                verificationFailed: '❌ 驗證失敗: '
+            },
+            'en': {
+                title: 'SheerID Verifier',
+                startVerify: 'Start Verification',
+                advancedSettings: 'Advanced Settings',
+                firstName: 'First Name',
+                lastName: 'Last Name',
+                email: 'Email',
+                birthDate: 'Birth Date',
+                school: 'School',
+                customLogoUrl: 'Custom Logo URL (Optional)',
+                customLogoPlaceholder: 'Leave blank to use school default logo',
+                console: 'Console',
+                clear: 'Clear',
+                export: 'Export',
+                systemReady: 'System ready. Waiting for input...',
+                about: 'About',
+                successTitle: 'Verification Successful!',
+                successMessage: 'Your student status has been successfully verified',
+                goToSuccessPage: 'Go to Success Page',
+                completeCaptcha: 'Please complete the captcha',
+                studentCardPreview: 'Student Card Preview',
+                confirmInfo: 'Please confirm the student card information',
+                cancel: 'Cancel',
+                confirmSubmit: 'Confirm & Submit',
+                verifying: 'Verifying...',
+                pleaseEnterUrl: 'Please enter verification URL',
+                invalidUrlFormat: 'Invalid verification ID format',
+                captchaStep1: 'Please complete step 1 verification (hCaptcha)',
+                captchaStep2: 'Please complete step 2 verification (Turnstile)',
+                loadingCaptcha: 'Loading captcha...',
+                captchaComplete: 'Verification complete!',
+                generatingCard: 'Generating student card...',
+                cardGenerated: 'Student card generated successfully',
+                verificationSuccess: '✅ Verification successful! Redirect URL: ',
+                verificationFailed: '❌ Verification failed: '
+            },
+            'ja': {
+                title: 'SheerID 検証ツール',
+                startVerify: '検証を開始',
+                advancedSettings: '詳細設定',
+                firstName: '名',
+                lastName: '姓',
+                email: 'メール',
+                birthDate: '生年月日',
+                school: '学校',
+                customLogoUrl: 'カスタムロゴURL (オプション)',
+                customLogoPlaceholder: '空白の場合は学校のデフォルトロゴを使用',
+                console: 'コンソール',
+                clear: 'クリア',
+                export: 'エクスポート',
+                systemReady: 'システム準備完了。入力待機中...',
+                about: '概要',
+                successTitle: '検証成功！',
+                successMessage: '学生ステータスが正常に検証されました',
+                goToSuccessPage: '成功ページへ',
+                completeCaptcha: 'キャプチャを完了してください',
+                studentCardPreview: '学生証プレビュー',
+                confirmInfo: '学生証情報を確認してください',
+                cancel: 'キャンセル',
+                confirmSubmit: '確認して送信',
+                verifying: '検証中...',
+                pleaseEnterUrl: '検証URLを入力してください',
+                invalidUrlFormat: '無効な検証ID形式',
+                captchaStep1: 'ステップ1の検証を完了してください (hCaptcha)',
+                captchaStep2: 'ステップ2の検証を完了してください (Turnstile)',
+                loadingCaptcha: 'キャプチャを読み込み中...',
+                captchaComplete: '検証完了！',
+                generatingCard: '学生証を生成中...',
+                cardGenerated: '学生証が正常に生成されました',
+                verificationSuccess: '✅ 検証成功！リダイレクトURL: ',
+                verificationFailed: '❌ 検証失敗: '
+            },
+            'de': {
+                title: 'SheerID Verifizierer',
+                startVerify: 'Verifizierung starten',
+                advancedSettings: 'Erweiterte Einstellungen',
+                firstName: 'Vorname',
+                lastName: 'Nachname',
+                email: 'E-Mail',
+                birthDate: 'Geburtsdatum',
+                school: 'Schule',
+                customLogoUrl: 'Benutzerdefinierte Logo-URL (Optional)',
+                customLogoPlaceholder: 'Leer lassen für Standard-Schullogo',
+                console: 'Konsole',
+                clear: 'Löschen',
+                export: 'Exportieren',
+                systemReady: 'System bereit. Warte auf Eingabe...',
+                about: 'Über',
+                successTitle: 'Verifizierung erfolgreich!',
+                successMessage: 'Ihr Studentenstatus wurde erfolgreich verifiziert',
+                goToSuccessPage: 'Zur Erfolgsseite',
+                completeCaptcha: 'Bitte vervollständigen Sie das Captcha',
+                studentCardPreview: 'Studentenausweis Vorschau',
+                confirmInfo: 'Bitte bestätigen Sie die Studentenausweis-Informationen',
+                cancel: 'Abbrechen',
+                confirmSubmit: 'Bestätigen & Senden',
+                verifying: 'Verifiziere...',
+                pleaseEnterUrl: 'Bitte Verifizierungs-URL eingeben',
+                invalidUrlFormat: 'Ungültiges Verifizierungs-ID-Format',
+                captchaStep1: 'Bitte vervollständigen Sie Schritt 1 (hCaptcha)',
+                captchaStep2: 'Bitte vervollständigen Sie Schritt 2 (Turnstile)',
+                loadingCaptcha: 'Lade Captcha...',
+                captchaComplete: 'Verifizierung abgeschlossen!',
+                generatingCard: 'Erstelle Studentenausweis...',
+                cardGenerated: 'Studentenausweis erfolgreich erstellt',
+                verificationSuccess: '✅ Verifizierung erfolgreich! Weiterleitungs-URL: ',
+                verificationFailed: '❌ Verifizierung fehlgeschlagen: '
             }
         };
-
-        const defaultAvatar = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAIoSURBVHhe7dxBSuNAEAXgr9go1q71CLuK4B2EuxbsXcQjOBCs/Qh2VvYGdlYQ/MMoZJLsP4iQMvNMfPBBgpm8uSTJSj01GIZhGIZhGIZhGIZhGIZhOAVkWRZ4vV4U371er/P5/JjW6wGCIODxeND9fr/r8XgY27Zl37Zt2dGyrIzy/fP50P1+12vVSoV8PnfqtVqlz+dz6+l0qtfrVfX7/Vqj0dAFGg2H4XA4rFqthlqtBgSBTCbDNE3bNnC73eZ2u8nu9/tEPM/T/X4XmUwGo9EIBoMB7vd78jwPCIIY27YhSRLkeR7z+RySSAShUAg4nU5hNpsZ27ZhaZqU1dX19fX1dbPZbLJarWRZFsYY6vU65nkecrkcbreb7HK5/P1eX18jSRLcbjds26ZQKGA2m4V0Op0eX1+v14+n0+mxbduyrKzKsuzy8nK51WpVNpvdajaboCiKwOPx+Hy+qFarvF6vR6NRoNVqQRRFQRRFoSiKiKJo6JpGvV6v1+tF33K5rKurq+v1Gk3TNE0jh8NR9XrdbrdbUavVkCTJsmxZlmVZlmVZlmVZlmVZlmVZlmVZljW6/v5+X1+vP99//vjx4/fvX9//d776+q4qimJaX1/X3/9eH39/fV3/7w8AGIZhGIZhGIZhGIZhGIbhdMvL/wDqgB+wZ4o81AAAAABJRU5ErkJggg==';
-
-        // --- CORE FUNCTIONS ---
-        const loadImage = (src) => new Promise((resolve, reject) => {
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.onload = () => resolve(img);
-            img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
-            img.src = src;
-        });
         
-        async function generateCard(data) {
-            const canvas = document.getElementById('studentCard');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 500;
-            canvas.height = 310;
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'white';
-            ctx.strokeStyle = '#e5e7eb';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.roundRect(10, 10, canvas.width - 20, canvas.height - 20, 12);
-            ctx.fill();
-            ctx.stroke();
-            ctx.fillStyle = '#dc2626';
-            ctx.beginPath();
-            ctx.roundRect(10, 10, canvas.width - 20, 75, [12, 12, 0, 0]);
-            ctx.fill();
-
-            try {
-                const logo = await loadImage(data.school.logo);
-                ctx.fillStyle = 'white';
-                ctx.beginPath();
-                ctx.roundRect(30, 22, 50, 50, 8);
-                ctx.fill();
-                ctx.drawImage(logo, 30, 22, 50, 50);
-
-                const avatar = await loadImage(data.photo);
-                ctx.beginPath();
-                ctx.roundRect(30, 105, 90, 90, 8);
-                ctx.clip();
-                ctx.drawImage(avatar, 30, 105, 90, 90);
-                ctx.resetTransform();
-
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 16px "Segoe UI", Arial, sans-serif';
-                ctx.textAlign = 'left';
-                const schoolNameLines = data.school.name.split('\n');
-                schoolNameLines.forEach((line, index) => ctx.fillText(line, 95, 38 + (index * 18)));
-                ctx.font = '11px "Segoe UI", Arial, sans-serif';
-                ctx.fillText('INTERNATIONAL STUDENT ID CARD', 95, 75);
-
-                ctx.fillStyle = 'black';
-                ctx.font = 'bold 20px "Segoe UI", Arial, sans-serif';
-                ctx.fillText('NAME:', 140, 130);
-                ctx.fillText('STUDENT ID:', 140, 160);
-                ctx.fillText('FACULTY:', 140, 190);
-
-                ctx.font = '20px "Segoe UI", Arial, sans-serif';
-                ctx.fillText(`${data.firstName} ${data.lastName}`, 240, 130);
-                ctx.fillText(data.studentId, 295, 160);
-                ctx.fillText(data.faculty, 260, 190);
-
-                ctx.strokeStyle = '#e5e7eb';
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.moveTo(canvas.width / 2, 230);
-                ctx.lineTo(canvas.width / 2, 280);
-                ctx.stroke();
-
-                ctx.fillStyle = '#6b7280';
-                ctx.font = '14px "Segoe UI", Arial, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('ISSUE', canvas.width * 0.25 + 10, 250);
-                ctx.fillText('VALID', canvas.width * 0.75 - 10, 250);
-
-                ctx.fillStyle = 'black';
-                ctx.font = 'bold 16px "Segoe UI", Arial, sans-serif';
-                const issueDate = new Date();
-                const validDate = new Date(issueDate);
-                validDate.setFullYear(issueDate.getFullYear() + 4);
-                const formatDate = (date) => date.toISOString().split('T')[0];
-                ctx.fillText(formatDate(issueDate), canvas.width * 0.25 + 10, 275);
-                ctx.fillText(formatDate(validDate), canvas.width * 0.75 - 10, 275);
-            } catch (error) {
-                console.error(error);
-                ctx.fillStyle = 'red';
-                ctx.textAlign = 'center';
-                ctx.fillText('Error: Image failed to load.', canvas.width / 2, canvas.height/2);
+        let currentLanguage = 'zh-CN';
+        let currentRedirectUrl = '';
+        
+        // 设置语言
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            document.documentElement.lang = lang;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // 更新所有带有data-i18n属性的元素
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+            
+            // 更新placeholder
+            const customLogoInput = document.getElementById('customLogoUrl');
+            if (customLogoInput) {
+                customLogoInput.placeholder = translations[lang].customLogoPlaceholder || '';
+            }
+            
+            log(t('languageChanged', `Language changed to ${lang}`), 'info');
+        }
+        
+        // 获取翻译
+        function t(key, defaultValue = '') {
+            return translations[currentLanguage][key] || defaultValue || key;
+        }
+        
+        // 全局学校配置
+        const schools = {
+            '1953': {
+                name: 'Nfe Norddeutscher Fachverband Elektro- Und Informationstechnik E.V. (Hamburg)',
+                idExtended: '1953',
+                domain: 'nfe.EDU',
+                logo: 'assets/nfe.png'
+            },
+        };
+        
+        // 全局变量
+        let currentVerificationId = '';
+        let logs = [];
+        let currentStudentCard = null;
+        let captchaTokens = {
+            hcaptcha: null,
+            turnstile: null
+        };
+        let captchaResolve = null;
+        let captchaReject = null;
+        
+        // 控制台日志函数
+        function log(message, type = 'log') {
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const logEntry = { time, message, type };
+            logs.push(logEntry);
+            
+            const consoleBody = document.getElementById('consoleBody');
+            const line = document.createElement('div');
+            line.className = 'console-line';
+            line.innerHTML = `
+                <span class="console-time">[${time}]</span>
+                <span class="console-content console-${type}">${escapeHtml(message)}</span>
+            `;
+            consoleBody.appendChild(line);
+            consoleBody.scrollTop = consoleBody.scrollHeight;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function clearConsole() {
+            logs = [];
+            document.getElementById('consoleBody').innerHTML = '';
+            log('Console cleared', 'debug');
+        }
+        
+        function exportLogs() {
+            const logText = logs.map(l => `[${l.time}] [${l.type.toUpperCase()}] ${l.message}`).join('\n');
+            const blob = new Blob([logText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `console_${Date.now()}.log`;
+            a.click();
+            URL.revokeObjectURL(url);
+            log('Logs exported', 'success');
+        }
+        
+        // 显示关于信息
+        function showAbout() {
+            alert('SheerID Verifier v1.0\n\nDeveloped for educational purposes\nVisit LinuxDo Forum for more information');
+        }
+        
+        // 切换高级设置
+        function toggleAdvanced() {
+            const settings = document.getElementById('advancedSettings');
+            const button = document.querySelector('.toggle-button');
+            settings.classList.toggle('show');
+            button.classList.toggle('active');
+        }
+        
+        // 名字生成器
+        const nameGenerator = {
+            roots: {
+                prefixes: ['Al', 'Bri', 'Car', 'Dan', 'El', 'Fer', 'Gar', 'Har', 'Jes', 'Kar', 
+                        'Lar', 'Mar', 'Nor', 'Par', 'Quin', 'Ros', 'Sar', 'Tar', 'Val', 'Wil'],
+                middles: ['an', 'en', 'in', 'on', 'ar', 'er', 'or', 'ur', 'al', 'el', 
+                        'il', 'ol', 'am', 'em', 'im', 'om', 'ay', 'ey', 'oy', 'ian'],
+                suffixes: ['ton', 'son', 'man', 'ley', 'field', 'ford', 'wood', 'stone', 'worth', 'berg',
+                        'stein', 'bach', 'heim', 'gard', 'land', 'wick', 'shire', 'dale', 'brook', 'ridge'],
+                nameRoots: ['Alex', 'Bern', 'Crist', 'Dav', 'Edw', 'Fred', 'Greg', 'Henr', 'Ivan', 'John',
+                            'Ken', 'Leon', 'Mich', 'Nick', 'Oliv', 'Paul', 'Rich', 'Step', 'Thom', 'Will'],
+                nameEndings: ['a', 'e', 'i', 'o', 'y', 'ie', 'ey', 'an', 'en', 'in', 
+                            'on', 'er', 'ar', 'or', 'el', 'al', 'iel', 'ael', 'ine', 'lyn']
+            },
+            patterns: {
+                firstName: [
+                    ['prefix', 'ending'],
+                    ['nameRoot', 'ending'],
+                    ['prefix', 'middle', 'ending'],
+                    ['nameRoot', 'middle', 'ending']
+                ],
+                lastName: [
+                    ['prefix', 'suffix'],
+                    ['nameRoot', 'suffix'],
+                    ['prefix', 'middle', 'suffix'],
+                    ['compound']
+                ]
+            },
+            generateComponent(type, pattern) {
+                const components = [];
+                for (let part of pattern) {
+                    let component = '';
+                    switch(part) {
+                        case 'prefix':
+                            component = this.roots.prefixes[Math.floor(Math.random() * this.roots.prefixes.length)];
+                            break;
+                        case 'middle':
+                            component = this.roots.middles[Math.floor(Math.random() * this.roots.middles.length)];
+                            break;
+                        case 'suffix':
+                            component = this.roots.suffixes[Math.floor(Math.random() * this.roots.suffixes.length)];
+                            break;
+                        case 'nameRoot':
+                            component = this.roots.nameRoots[Math.floor(Math.random() * this.roots.nameRoots.length)];
+                            break;
+                        case 'ending':
+                            component = this.roots.nameEndings[Math.floor(Math.random() * this.roots.nameEndings.length)];
+                            break;
+                        case 'compound':
+                            const part1 = this.roots.prefixes[Math.floor(Math.random() * this.roots.prefixes.length)];
+                            const part2 = this.roots.suffixes[Math.floor(Math.random() * this.roots.suffixes.length)];
+                            component = part1 + part2;
+                            break;
+                    }
+                    components.push(component);
+                }
+                return components.join('');
+            },
+            formatName(name) {
+                return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+            },
+            generate() {
+                const firstNamePattern = this.patterns.firstName[
+                    Math.floor(Math.random() * this.patterns.firstName.length)
+                ];
+                const lastNamePattern = this.patterns.lastName[
+                    Math.floor(Math.random() * this.patterns.lastName.length)
+                ];
+                const firstName = this.generateComponent('firstName', firstNamePattern);
+                const lastName = this.generateComponent('lastName', lastNamePattern);
+                return {
+                    firstName: this.formatName(firstName),
+                    lastName: this.formatName(lastName),
+                    fullName: `${this.formatName(firstName)} ${this.formatName(lastName)}`
+                };
+            }
+        };
+        
+        // 生成随机邮箱
+        function generateEmail() {
+            const schoolId = document.getElementById('schoolId').value;
+            const school = schools[schoolId];
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let username = '';
+            for (let i = 0; i < 8; i++) {
+                username += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return `${username}@${school.domain}`;
+        }
+        
+        // 生成随机生日
+        function generateBirthDate() {
+            const year = 2000 + Math.floor(Math.random() * 6);
+            const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
+            const day = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        // 更新邮箱域名
+        function updateEmailDomain() {
+            const schoolId = document.getElementById('schoolId').value;
+            const currentEmail = document.getElementById('email').value;
+            
+            if (currentEmail) {
+                const username = currentEmail.split('@')[0];
+                const newDomain = schools[schoolId].domain;
+                document.getElementById('email').value = `${username}@${newDomain}`;
+                log(`Updated email domain to ${newDomain}`, 'info');
             }
         }
-
-        // --- EVENT HANDLERS ---
-        async function generateAndShowCard() {
-            const data = {
-                firstName: document.getElementById('firstName').value,
-                lastName: document.getElementById('lastName').value,
-                studentId: document.getElementById('studentId').value,
-                faculty: document.getElementById('faculty').value,
-                school: schools[document.getElementById('schoolId').value],
-                photo: document.getElementById('photoUpload').files[0] ? URL.createObjectURL(document.getElementById('photoUpload').files[0]) : defaultAvatar
-            };
+        
+        // 初始化默认值
+        function initializeDefaults() {
+            const name = nameGenerator.generate();
+            document.getElementById('firstName').value = name.firstName;
+            document.getElementById('lastName').value = name.lastName;
+            document.getElementById('email').value = generateEmail();
+            document.getElementById('birthDate').value = generateBirthDate();
             
-            document.getElementById('preview-placeholder').style.display = 'none';
-            document.getElementById('preview-container').style.display = 'block';
-            await generateCard(data);
-        }
-
-        function generateRandom() {
-            const firstNames = ["SODT", "EVBAW", "ALEX", "JOHN"];
-            const lastNames = ["XIVWIO", "DAUVM", "DOE", "SMITH"];
-            const majors = ["Medicine", "Engineering", "Arts", "Science"];
-
-            document.getElementById('firstName').value = firstNames[Math.floor(Math.random() * firstNames.length)];
-            document.getElementById('lastName').value = lastNames[Math.floor(Math.random() * lastNames.length)];
-            document.getElementById('studentId').value = `INT${Math.floor(100000 + Math.random() * 900000)}`;
-            document.getElementById('faculty').value = majors[Math.floor(Math.random() * majors.length)];
-
-            const schoolKeys = Object.keys(schools);
-            document.getElementById('schoolId').value = schoolKeys[Math.floor(Math.random() * schoolKeys.length)];
-            
-            // Clear file input for photo
-            document.getElementById('photoUpload').value = '';
-            
-            generateAndShowCard();
-        }
-
-        function downloadCard() {
-            const canvas = document.getElementById('studentCard');
-            const link = document.createElement('a');
-            link.download = 'student-id.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
+            log(`Initialized with: ${name.firstName} ${name.lastName}`, 'debug');
         }
         
-        function submitVerification() {
-             alert('This would submit the generated image to your server/worker.');
+        // 解析URL
+        function parseUrl(url) {
+            try {
+                const match = url.match(/verificationId=([a-f0-9]+)/i);
+                if (match && match[1]) {
+                    return match[1];
+                }
+                throw new Error(t('invalidUrlFormat'));
+            } catch (error) {
+                log(error.message, 'error');
+                return null;
+            }
         }
-
-        // --- INITIALIZATION ---
-        window.onload = () => {
-            const schoolSelect = document.getElementById('schoolId');
-            Object.keys(schools).forEach(key => {
-                const option = document.createElement('option');
-                option.value = key;
-                option.textContent = schools[key].name.split('\n')[0]; // Show first line of name
-                schoolSelect.appendChild(option);
+        
+        // 获取Logo URL
+        function getLogoUrl() {
+            const customUrl = document.getElementById('customLogoUrl').value.trim();
+            if (customUrl) {
+                log(`Using custom logo URL: ${customUrl}`, 'debug');
+                return customUrl;
+            }
+            
+            const schoolId = document.getElementById('schoolId').value;
+            const school = schools[schoolId];
+            return school.logo;
+        }
+        
+        // 生成学生证
+        async function generateCard(firstName, lastName) {
+            log(t('generatingCard'), 'info');
+            
+            const canvas = document.getElementById('studentCard');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = 856;
+            canvas.height = 540;
+            
+            // 背景
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#8B5A2B');
+            gradient.addColorStop(0.5, '#A0826D');
+            gradient.addColorStop(1, '#B98B73');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 木纹
+            ctx.strokeStyle = 'rgba(160, 110, 60, 0.3)';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < canvas.height; i += Math.random() * 5 + 3) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+            
+            // 白色卡片
+            ctx.fillStyle = 'white';
+            roundRect(ctx, 20, 20, canvas.width - 40, canvas.height - 40, 15);
+            
+            // 标题
+            ctx.fillStyle = '#003278';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('STUDENT CARD', canvas.width / 2, 80);
+            
+            // Logo
+            const logoUrl = getLogoUrl();
+            
+            try {
+                const logo = new Image();
+                logo.crossOrigin = 'anonymous';
+                
+                await new Promise((resolve, reject) => {
+                    logo.onload = () => {
+                        const maxWidth = (canvas.width - 40) * 0.6;
+                        const maxHeight = (canvas.height - 40 - 120) * 0.6;
+                        const ratio = Math.min(maxWidth / logo.width, maxHeight / logo.height);
+                        const newWidth = logo.width * ratio;
+                        const newHeight = logo.height * ratio;
+                        const logoX = (canvas.width - newWidth) / 2;
+                        const logoY = 150;
+                        
+                        ctx.drawImage(logo, logoX, logoY, newWidth, newHeight);
+                        
+                        // 学生信息
+                        const infoY = logoY + newHeight + 40;
+                        ctx.fillStyle = 'black';
+                        ctx.font = 'bold 24px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(`NAME: ${firstName} ${lastName}`, canvas.width / 2, infoY);
+                        ctx.fillText('VALID BEFORE: 2027/06', canvas.width / 2, infoY + 50);
+                        
+                        resolve();
+                    };
+                    logo.onerror = reject;
+                    logo.src = logoUrl;
+                });
+                
+                log(t('cardGenerated'), 'success');
+            } catch (error) {
+                log(`Logo loading failed: ${error.message}`, 'warning');
+                ctx.fillStyle = 'black';
+                ctx.font = 'bold 32px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`NAME: ${firstName} ${lastName}`, canvas.width / 2, 300);
+                ctx.fillText('VALID BEFORE: 2027/06', canvas.width / 2, 360);
+            }
+        }
+        
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = '#323232';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+        
+        // 验证码相关函数
+        function showCaptchaModal() {
+            return new Promise((resolve, reject) => {
+                captchaResolve = resolve;
+                captchaReject = reject;
+                
+                const needsHcaptcha = window.CONFIG.hcaptcha.sitekey;
+                const needsTurnstile = window.CONFIG.turnstile.sitekey;
+                
+                if (!needsHcaptcha && !needsTurnstile) {
+                    log('No captcha configured, skipping verification', 'debug');
+                    resolve({ hcaptcha: null, turnstile: null });
+                    return;
+                }
+                
+                // 重置tokens
+                captchaTokens = { hcaptcha: null, turnstile: null };
+                
+                // 显示模态框
+                document.getElementById('captchaModal').classList.add('show');
+                
+                // 清空容器
+                document.getElementById('hcaptcha-container').innerHTML = '';
+                document.getElementById('turnstile-container').innerHTML = '';
+                
+                // 设置初始状态
+                updateCaptchaStatus(t('loadingCaptcha'));
+                
+                // 如果需要hCaptcha，先加载它
+                if (needsHcaptcha) {
+                    log('Loading hCaptcha...', 'info');
+                    updateCaptchaTitle(t('captchaStep1'));
+                    updateCaptchaStatus('');
+                    
+                    // 显示hCaptcha容器，隐藏turnstile容器
+                    document.getElementById('hcaptcha-container').style.display = 'block';
+                    document.getElementById('turnstile-container').style.display = 'none';
+                    
+                    try {
+                        hcaptcha.render('hcaptcha-container', {
+                            sitekey: window.CONFIG.hcaptcha.sitekey,
+                            callback: (token) => {
+                                captchaTokens.hcaptcha = token;
+                                log('hCaptcha verified successfully', 'success');
+                                onHcaptchaComplete();
+                            },
+                            'error-callback': () => {
+                                log('hCaptcha error', 'error');
+                                if (captchaReject) {
+                                    captchaReject(new Error('hCaptcha verification failed'));
+                                }
+                                closeCaptchaModal();
+                            }
+                        });
+                    } catch (error) {
+                        log(`Failed to render hCaptcha: ${error.message}`, 'error');
+                        if (captchaReject) {
+                            captchaReject(error);
+                        }
+                        closeCaptchaModal();
+                    }
+                } else {
+                    // 如果不需要hCaptcha，直接加载Turnstile
+                    loadTurnstile();
+                }
             });
-            generateRandom(); // Generate random data on load
+        }
+        
+        function onHcaptchaComplete() {
+            const needsTurnstile = window.CONFIG.turnstile.sitekey;
+            
+            if (needsTurnstile) {
+                // hCaptcha完成后，加载Turnstile
+                log('hCaptcha complete, loading Turnstile...', 'info');
+                
+                // 隐藏hCaptcha，显示Turnstile
+                document.getElementById('hcaptcha-container').style.display = 'none';
+                
+                // 加载Turnstile
+                loadTurnstile();
+            } else {
+                // 如果不需要Turnstile，直接完成
+                completeCaptchaVerification();
+            }
+        }
+        
+        function loadTurnstile() {
+            if (!window.CONFIG.turnstile.sitekey) {
+                completeCaptchaVerification();
+                return;
+            }
+            
+            log('Loading Turnstile...', 'info');
+            updateCaptchaTitle(t('captchaStep2'));
+            updateCaptchaStatus('');
+            
+            // 显示Turnstile容器
+            document.getElementById('turnstile-container').style.display = 'block';
+            
+            try {
+                turnstile.render('#turnstile-container', {
+                    sitekey: window.CONFIG.turnstile.sitekey,
+                    callback: (token) => {
+                        captchaTokens.turnstile = token;
+                        log('Turnstile verified successfully', 'success');
+                        completeCaptchaVerification();
+                    },
+                    'error-callback': () => {
+                        log('Turnstile error', 'error');
+                        if (captchaReject) {
+                            captchaReject(new Error('Turnstile verification failed'));
+                        }
+                        closeCaptchaModal();
+                    }
+                });
+            } catch (error) {
+                log(`Failed to render Turnstile: ${error.message}`, 'error');
+                if (captchaReject) {
+                    captchaReject(error);
+                }
+                closeCaptchaModal();
+            }
+        }
+        
+        function completeCaptchaVerification() {
+            log('All captchas verified successfully', 'success');
+            updateCaptchaStatus(t('captchaComplete'));
+            
+            // 延迟一下让用户看到成功状态
+            setTimeout(() => {
+                document.getElementById('captchaModal').classList.remove('show');
+                if (captchaResolve) {
+                    captchaResolve(captchaTokens);
+                }
+            }, 500);
+        }
+        
+        function updateCaptchaTitle(text) {
+            document.getElementById('captchaTitle').textContent = text;
+        }
+        
+        function updateCaptchaStatus(text) {
+            document.getElementById('captchaStatus').textContent = text;
+        }
+        
+        function closeCaptchaModal() {
+            document.getElementById('captchaModal').classList.remove('show');
+            captchaTokens = { hcaptcha: null, turnstile: null };
+            captchaResolve = null;
+            captchaReject = null;
+        }
+        
+        // 显示模态框
+        function showModal() {
+            document.getElementById('previewModal').classList.add('show');
+        }
+        
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('previewModal').classList.remove('show');
+        }
+        
+        // 显示成功模态框
+        function showSuccessModal(redirectUrl) {
+            currentRedirectUrl = redirectUrl;
+            document.getElementById('successRedirectUrl').textContent = redirectUrl;
+            document.getElementById('successModal').classList.add('show');
+        }
+        
+        // 跳转到成功页面
+        function redirectToSuccess() {
+            if (currentRedirectUrl) {
+                window.open(currentRedirectUrl, '_blank');
+            }
+            document.getElementById('successModal').classList.remove('show');
+        }
+        
+        // 开始验证
+        async function startVerification() {
+            const urlInput = document.getElementById('urlInput').value.trim();
+            
+            if (!urlInput) {
+                log(t('pleaseEnterUrl'), 'error');
+                return;
+            }
+            
+            // 解析URL
+            const verificationId = parseUrl(urlInput);
+            if (!verificationId) {
+                return;
+            }
+            
+            currentVerificationId = verificationId;
+            log(`Extracted verification ID: ${verificationId}`, 'success');
+            
+            // 获取当前表单值
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const birthDate = document.getElementById('birthDate').value;
+            const schoolId = document.getElementById('schoolId').value;
+            const school = schools[schoolId];
+            
+            log(`Student: ${firstName} ${lastName}`, 'info');
+            log(`Email: ${email}`, 'info');
+            log(`School: ${school.name}`, 'info');
+            log(`Birth Date: ${birthDate}`, 'info');
+            
+            // 生成学生证
+            await generateCard(firstName, lastName);
+            
+            // 显示预览模态框
+            showModal();
+        }
+        
+        // 确认并提交
+        async function confirmAndSubmit() {
+            closeModal();
+            
+            try {
+                // 显示验证码
+                const tokens = await showCaptchaModal();
+                captchaTokens = tokens;
+                
+                // 提交验证
+                await submitVerification();
+            } catch (error) {
+                log(`Captcha verification failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // 提交验证
+        async function submitVerification() {
+            const button = document.getElementById('verifyButton');
+            button.disabled = true;
+            button.innerHTML = `<span class="loading-spinner white"></span>${t('verifying')}`;
+            
+            log('Starting verification process...', 'info');
+            
+            try {
+                const canvas = document.getElementById('studentCard');
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                
+                // 检查文件大小
+                if (blob.size > window.CONFIG.maxFileSize) {
+                    const sizeMB = (blob.size / (1024 * 1024)).toFixed(2);
+                    throw new Error(`File size (${sizeMB}MB) exceeds 1MB limit`);
+                }
+                
+                const formData = new FormData();
+                formData.append('verificationId', currentVerificationId);
+                formData.append('firstName', document.getElementById('firstName').value);
+                formData.append('lastName', document.getElementById('lastName').value);
+                formData.append('email', document.getElementById('email').value);
+                formData.append('birthDate', document.getElementById('birthDate').value);
+                formData.append('schoolId', document.getElementById('schoolId').value);
+                formData.append('studentCard', blob, 'student_card.png');
+                
+                // 添加验证码token
+                if (captchaTokens.hcaptcha) {
+                    formData.append('hcaptchaToken', captchaTokens.hcaptcha);
+                }
+                if (captchaTokens.turnstile) {
+                    formData.append('turnstileToken', captchaTokens.turnstile);
+                }
+                
+                log('Sending request to server...', 'debug');
+                
+                const workerUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:8787' 
+                    : window.CONFIG.workerUrl;
+                
+                const response = await fetch(`${workerUrl}/api/verify`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                // 显示服务器返回的日志
+                if (result.logs && result.logs.length > 0) {
+                    log('=== Server Logs ===', 'info');
+                    result.logs.forEach(logItem => {
+                        log(logItem.message, logItem.type || 'debug');
+                    });
+                    log('=== End Server Logs ===', 'info');
+                }
+                
+                if (result.success) {
+                    const redirectUrl = result.redirectUrl || 'https://one.google.com/ai-student';
+                    log(t('verificationSuccess') + redirectUrl, 'success');
+                    
+                    // 显示成功提示
+                    showSuccessModal(redirectUrl);
+                } else {
+                    log(t('verificationFailed') + result.message, 'error');
+                }
+                
+                // 重置验证码token
+                captchaTokens = { hcaptcha: null, turnstile: null };
+                
+            } catch (error) {
+                log(`Fatal error: ${error.message}`, 'error');
+                console.error(error);
+            } finally {
+                button.disabled = false;
+                button.innerHTML = `<span data-i18n="startVerify">${t('startVerify')}</span>`;
+            }
+        }
+        
+        // 初始化
+        window.onload = function() {
+            log('System initialized', 'success');
+            
+            // 显示验证码配置状态
+            if (window.CONFIG.hcaptcha.sitekey) {
+                log('hCaptcha enabled', 'info');
+            } else {
+                log('hCaptcha disabled', 'debug');
+            }
+            
+            if (window.CONFIG.turnstile.sitekey) {
+                log('Turnstile enabled', 'info');
+            } else {
+                log('Turnstile disabled', 'debug');
+            }
+            
+            log('Ready to process SheerID verification URLs', 'info');
+            
+            // 初始化默认值
+            initializeDefaults();
+            
+            const urlInput = document.getElementById('urlInput');
+            
+            // 监听Enter键
+            urlInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    startVerification();
+                }
+            });
+            
+            // 监听粘贴事件
+            urlInput.addEventListener('paste', function(e) {
+                setTimeout(() => {
+                    const pastedText = e.target.value;
+                    if (pastedText.includes('verificationId=')) {
+                        log('Detected verification URL paste, processing...', 'info');
+                    }
+                }, 100);
+            });
         };
     </script>
 </body>
