@@ -1294,104 +1294,123 @@
             return school.logo;
         }
         
-        // 生成学生证
-        async function generateCard(firstName, lastName) {
+// 生成学生证 (新版本，完美兼容新设计)
+        async function generateCard(firstName, lastName, email) {
             log(t('generatingCard'), 'info');
             
             const canvas = document.getElementById('studentCard');
             const ctx = canvas.getContext('2d');
             
-            canvas.width = 856;
-            canvas.height = 540;
+            // 调整画布尺寸以匹配新设计的长宽比
+            canvas.width = 450; 
+            canvas.height = 280;
             
-            // 背景
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            gradient.addColorStop(0, '#8B5A2B');
-            gradient.addColorStop(0.5, '#A0826D');
-            gradient.addColorStop(1, '#B98B73');
-            ctx.fillStyle = gradient;
+            // 清空画布并设置背景色
+            ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // 木纹
-            ctx.strokeStyle = 'rgba(160, 110, 60, 0.3)';
-            ctx.lineWidth = 2;
-            for (let i = 0; i < canvas.height; i += Math.random() * 5 + 3) {
-                ctx.beginPath();
-                ctx.moveTo(0, i);
-                ctx.lineTo(canvas.width, i);
-                ctx.stroke();
-            }
-            
-            // 白色卡片
+
+            // --- 开始绘制卡片元素 ---
+
+            // 绘制白色卡片主体和灰色边框
             ctx.fillStyle = 'white';
-            roundRect(ctx, 20, 20, canvas.width - 40, canvas.height - 40, 15);
-            
-            // 标题
-            ctx.fillStyle = '#003278';
-            ctx.font = 'bold 48px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('STUDENT CARD', canvas.width / 2, 80);
-            
-            // Logo
-            const logoUrl = getLogoUrl();
-            
-            try {
-                const logo = new Image();
-                logo.crossOrigin = 'anonymous';
-                
-                await new Promise((resolve, reject) => {
-                    logo.onload = () => {
-                        const maxWidth = (canvas.width - 40) * 0.6;
-                        const maxHeight = (canvas.height - 40 - 120) * 0.6;
-                        const ratio = Math.min(maxWidth / logo.width, maxHeight / logo.height);
-                        const newWidth = logo.width * ratio;
-                        const newHeight = logo.height * ratio;
-                        const logoX = (canvas.width - newWidth) / 2;
-                        const logoY = 150;
-                        
-                        ctx.drawImage(logo, logoX, logoY, newWidth, newHeight);
-                        
-                        // 学生信息
-                        const infoY = logoY + newHeight + 40;
-                        ctx.fillStyle = 'black';
-                        ctx.font = 'bold 24px Arial';
-                        ctx.textAlign = 'center';
-                        ctx.fillText(`NAME: ${firstName} ${lastName}`, canvas.width / 2, infoY);
-                        ctx.fillText('VALID BEFORE: 2027/06', canvas.width / 2, infoY + 50);
-                        
-                        resolve();
-                    };
-                    logo.onerror = reject;
-                    logo.src = logoUrl;
+            ctx.strokeStyle = '#e5e7eb'; // Tailwind gray-200
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.roundRect(10, 10, canvas.width - 20, canvas.height - 20, 8); // 圆角
+            ctx.fill();
+            ctx.stroke();
+
+            // 绘制顶部的红色标题栏
+            ctx.fillStyle = '#dc2626'; // Tailwind red-600
+            ctx.beginPath();
+            ctx.roundRect(10, 10, canvas.width - 20, 60, [8, 8, 0, 0]); // 只设置顶部两个圆角
+            ctx.fill();
+
+            // 定义一个加载图片的辅助函数
+            const loadImage = (src) => {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous'; // 允许跨域加载图片
+                    img.onload = () => resolve(img);
+                    img.onerror = (err) => reject(new Error(`Failed to load image: ${src}`));
+                    img.src = src;
                 });
+            };
+
+            try {
+                // --- 加载并绘制学校 Logo ---
+                const logoUrl = getLogoUrl(); // 复用您已有的 getLogoUrl 函数
+                const logo = await loadImage(logoUrl);
+                // 在Logo后面画一个白色圆角背景，确保Logo清晰
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.roundRect(25, 20, 40, 40, 6); 
+                ctx.fill();
+                ctx.drawImage(logo, 25, 20, 40, 40);
+
+                // --- 加载并绘制学生头像 ---
+                // 这里我们用一个固定的头像URL来模拟React版本中的默认头像
+                const avatar = await loadImage('https://i.imgur.com/8l5vG5v.png'); // 一个通用的头像占位图
+                ctx.beginPath();
+                ctx.roundRect(30, 90, 96, 96, 6); // 给头像也加上圆角
+                ctx.clip(); // 裁剪区域，让图片也变成圆角
+                ctx.drawImage(avatar, 30, 90, 96, 96);
+                ctx.resetTransform(); // 重置裁剪
+
+                // --- 绘制所有文字 ---
                 
+                // 标题栏文字
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 13px "Segoe UI", Arial, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText('Massachusetts Institute of Technology', 75, 38);
+                ctx.font = '10px "Segoe UI", Arial, sans-serif';
+                ctx.fillText('INTERNATIONAL STUDENT ID CARD', 75, 55);
+
+                // 学生信息文字
+                ctx.fillStyle = 'black';
+                ctx.textAlign = 'left';
+                ctx.font = 'bold 14px "Segoe UI", Arial, sans-serif';
+                ctx.fillText('NAME:', 140, 115);
+                ctx.fillText('STUDENT ID:', 140, 145);
+                ctx.fillText('FACULTY:', 140, 175);
+
+                ctx.font = '14px "Segoe UI", Arial, sans-serif';
+                ctx.fillText(`${firstName} ${lastName}`, 220, 115);
+                // 假设学号和专业是固定的，因为原函数没有这些信息
+                ctx.fillText('INT123456', 220, 145); 
+                ctx.fillText('Computer Science', 220, 175);
+                
+                // 绘制底部的分割线和日期
+                ctx.strokeStyle = '#e5e7eb';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(10, 215);
+                ctx.lineTo(canvas.width - 10, 215);
+                ctx.stroke();
+
+                ctx.fillStyle = '#6b7280'; // Tailwind gray-500
+                ctx.font = '11px "Segoe UI", Arial, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('ISSUE', canvas.width * 0.25 + 10, 235);
+                ctx.fillText('VALID', canvas.width * 0.75 - 10, 235);
+
+                ctx.fillStyle = 'black';
+                ctx.font = 'bold 12px "Segoe UI", Arial, sans-serif';
+                const issueDate = new Date().toISOString().split('T')[0];
+                const validDate = new Date(new Date().setFullYear(new Date().getFullYear() + 4)).toISOString().split('T')[0];
+                ctx.fillText(issueDate, canvas.width * 0.25 + 10, 255);
+                ctx.fillText(validDate, canvas.width * 0.75 - 10, 255);
+
                 log(t('cardGenerated'), 'success');
             } catch (error) {
-                log(`Logo loading failed: ${error.message}`, 'warning');
-                ctx.fillStyle = 'black';
-                ctx.font = 'bold 32px Arial';
+                log(`图片加载失败: ${error.message}`, 'warning');
+                // 如果图片加载失败，显示错误信息
+                ctx.fillStyle = 'red';
                 ctx.textAlign = 'center';
-                ctx.fillText(`NAME: ${firstName} ${lastName}`, canvas.width / 2, 300);
-                ctx.fillText('VALID BEFORE: 2027/06', canvas.width / 2, 360);
+                ctx.font = '16px Arial';
+                ctx.fillText('错误: 图片资源加载失败', canvas.width / 2, canvas.height / 2);
             }
-        }
-        
-        function roundRect(ctx, x, y, width, height, radius) {
-            ctx.beginPath();
-            ctx.moveTo(x + radius, y);
-            ctx.lineTo(x + width - radius, y);
-            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-            ctx.lineTo(x + width, y + height - radius);
-            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-            ctx.lineTo(x + radius, y + height);
-            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-            ctx.lineTo(x, y + radius);
-            ctx.quadraticCurveTo(x, y, x + radius, y);
-            ctx.closePath();
-            ctx.fill();
-            ctx.strokeStyle = '#323232';
-            ctx.lineWidth = 3;
-            ctx.stroke();
         }
         
         // 验证码相关函数
@@ -1603,7 +1622,7 @@
             log(`Birth Date: ${birthDate}`, 'info');
             
             // 生成学生证
-            await generateCard(firstName, lastName);
+            await generateCard(firstName, lastName, email);
             
             // 显示预览模态框
             showModal();
