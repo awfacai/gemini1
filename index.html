@@ -3,100 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SheerID Verifier</title>
-    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-    <script>
-        // 配置
-        window.CONFIG = {
-            workerUrl: "https://gemini.irvv.workers.dev",
-            hcaptcha: { sitekey: "" },
-            turnstile: { sitekey: "" },
-            maxFileSize: 1 * 1024 * 1024
-        };
-    </script>
+    <title>Student Document Generator</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f3f4f6; margin: 0; }
-        .main-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .input-section { background: #fff; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
-        .form-group { display: flex; flex-direction: column; }
-        .form-group label { font-size: 13px; color: #666; margin-bottom: 6px; font-weight: 500; }
-        .form-group input, .form-group select { padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; }
-        .url-input { width: 100%; padding: 16px 20px; font-size: 15px; border: 2px solid #e0e0e0; border-radius: 12px; }
-        .verify-button { margin-top: 15px; width: 100%; padding: 14px; background: #1a1a1a; color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
-        .modal.show { display: flex; }
-        .modal-content { background: white; padding: 20px; border-radius: 16px; max-width: 600px; width: 90%; text-align: center; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e0e0; padding-bottom: 10px; margin-bottom: 20px; }
-        .modal-title { font-size: 18px; font-weight: 600; }
-        .modal-close { font-size: 24px; border: none; background: none; cursor: pointer; }
-        .modal-footer { margin-top: 20px; display: flex; gap: 10px; justify-content: center; }
-        .modal-button { padding: 10px 24px; border-radius: 8px; border: none; font-size: 14px; cursor: pointer; }
-        .modal-button-primary { background: #1a1a1a; color: #fff; }
-        .modal-button-secondary { background: #f0f0f0; color: #666; }
-        .console-section { background: #1a1a1a; color: #fff; border-radius: 12px; min-height: 200px; padding: 16px; font-family: monospace; overflow-y: auto; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f3f4f6; margin: 0; display: flex; justify-content: center; align-items: flex-start; padding-top: 2rem; }
+        .main-container { max-width: 1200px; width: 100%; display: grid; grid-template-columns: 1fr; gap: 2rem; }
+        @media (min-width: 1024px) { .main-container { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        .card { background: #fff; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); }
+        .card-title { font-size: 1.25rem; font-weight: 600; margin: 0 0 1.5rem 0; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.875rem; color: #4b5563; margin-bottom: 0.5rem; font-weight: 500; }
+        .form-group input, .form-group select { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem; box-sizing: border-box; }
+        .button { width: 100%; padding: 0.75rem; border: none; border-radius: 0.5rem; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
+        .button-primary { background: #1f2937; color: #fff; }
+        .button-primary:hover { background: #374151; }
+        .button-secondary { background: #4f46e5; color: #fff; margin-top: 1rem; }
+        .button-secondary:hover { background: #4338ca; }
+        .preview-placeholder { text-align: center; color: #6b7280; padding: 4rem 0; border: 2px dashed #d1d5db; border-radius: 0.75rem; }
+        #studentCard { max-width: 100%; border-radius: 0.5rem; }
     </style>
 </head>
 <body>
     <div class="main-container">
-        <div class="input-section">
-            <input type="text" id="urlInput" class="url-input" placeholder="粘贴 SheerID 验证链接...">
-            <button class="verify-button" onclick="startVerification()">开始验证</button>
-            <div class="form-grid" style="margin-top: 20px;">
-                <div class="form-group"><label>名字 (First Name)</label><input type="text" id="firstName"></div>
-                <div class="form-group"><label>姓氏 (Last Name)</label><input type="text" id="lastName"></div>
-                <div class="form-group"><label>邮箱 (Email)</label><input type="email" id="email"></div>
-                <div class="form-group"><label>生日 (Birth Date)</label><input type="date" id="birthDate"></div>
-                <div class="form-group"><label>学号 (Student ID)</label><input type="text" id="studentId" value="INT731320"></div>
-                <div class="form-group"><label>专业 (Faculty)</label><input type="text" id="faculty" value="Medicine"></div>
-                <div class="form-group"><label>学校 (School)</label><select id="schoolId"><option value="nfe">Nfe Norddeutscher</option></select></div>
-                <div class="form-group"><label>自定义Logo (可选)</label><input type="text" id="customLogoUrl"></div>
+        <div class="card">
+            <h2 class="card-title">🎛️ Controls</h2>
+            <div class="form-group">
+                <label for="schoolId">University</label>
+                <select id="schoolId"></select>
             </div>
+            <div class="form-group">
+                <label for="firstName">First Name</label>
+                <input type="text" id="firstName">
+            </div>
+            <div class="form-group">
+                <label for="lastName">Last Name</label>
+                <input type="text" id="lastName">
+            </div>
+            <div class="form-group">
+                <label for="studentId">Student ID</label>
+                <input type="text" id="studentId">
+            </div>
+            <div class="form-group">
+                <label for="faculty">Faculty / Major</label>
+                <input type="text" id="faculty">
+            </div>
+            <div class="form-group">
+                <label for="photoUpload">Student Photo</label>
+                <input type="file" id="photoUpload" accept="image/*">
+            </div>
+            <button class="button button-primary" onclick="generateAndShowCard()">Generate Student ID</button>
+            <button class="button button-secondary" onclick="generateRandom()">🎲 One-Click Random</button>
         </div>
-        <div class="console-section" id="consoleBody"></div>
-    </div>
 
-    <div class="modal" id="previewModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="modal-title">学生证预览</span>
-                <button class="modal-close" onclick="closeModal()">×</button>
+        <div class="card">
+            <h2 class="card-title">🖼️ Preview</h2>
+            <div id="preview-placeholder" class="preview-placeholder">
+                <p>Your generated ID card will appear here.</p>
             </div>
-            <div class="modal-body">
-                <p>请确认学生证信息是否正确</p>
-                <canvas id="studentCard"></canvas>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-button modal-button-secondary" onclick="closeModal()">取消</button>
-                <button class="modal-button modal-button-primary" onclick="confirmAndSubmit()">确认并提交</button>
+            <div id="preview-container" style="display: none;">
+                 <canvas id="studentCard"></canvas>
+                 <button class="button button-secondary" onclick="downloadCard()">⬇️ Download as PNG</button>
             </div>
         </div>
     </div>
 
     <script>
+        // --- DATA AND CONFIGURATION ---
         const schools = {
             'nfe': {
                 name: 'Nfe Norddeutscher Fachverband\nElektro- Und Informationstechnik\nE.V. (Hamburg)',
-                domain: 'nfe.edu',
-                logo: 'assets/nfe.png'
+                logo: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAYFBMVEX///8BAQEAAAD8/PwICAgKCgrf39/5+fn19fU8PDxAQECurq5PT08xMTGJiYnDw8NfX1+EhISVlZWTk5NxcXFGRkbj4+NtbW1paWmBgYFAQD9ra2w3NzfOzs54eHhISEh/f5R2AAABnElEQVR4nO3dy1LCQBSF4ZCIh4qgAt4U8P+/s5JCIJ25N2fu8NzdpcsJm9nOhgEAAAAAAAAAAAAAAAAAAAAAAACA4lLa2/f3b1/H8+t7/y9G65pL93Wc5n/9/h73f5t3/sPZ3PzcvD+e75/Pz4/H8+r09fH8G5/j8/12/P70/f7v+N1+ft5/j18/P9/3/Te/j4/ny/T9/nf8f/583v+P/8/n++X5f//3/f98vp+nv4+f7+f5//5x//b3s5n9fP583n/1T18/3/cf+tL+fP5+fP5r/8/n+339fP9+v68/5n/290//fwEAAAAAAAAAAAAAAAAAAAAAAMC/0v/89P3+7/j96/v5vP/eT6f/j/8f/38+3++/5/f7/fN+P7/+PZ/v5/n+/fN+v37+fn++n+f79eP5fv38/Hw/z/frx/P9+vH8fP98P8/368fz/fp4fp/v18fz/Xo+37+fz/f79fN5f1+/n/0+P3+/vt/f75+Pz/f7+fn8/f7r+30BAAAAAAAAAAAAAAAAAAAAAAD4pT893CM+9jYyAAAAAElFTkSuQmCC'
             },
+            'mit': {
+                name: 'Massachusetts Institute\nof Technology (MIT)',
+                logo: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAb1BMVEX///8yMjImJiby8vImJiby8vL8/Pzz8/P5+fn19fUtLS0tLS35+fnz8/P19fX8/PwhISEhISGfn5+fn58/Pz/AwMDDw8N7e3t7e3vAwMB/f3+Pj4+tra2goKCUlJSysrLAwMCQkJBEREQ/Pz9/f3+goKCysrKUlJSurq4AAACaB0soAAACjElEQVR4nO3d61LbQBSF4RImQjGgKOLGo95P9v5vU9o13S2lR2daxlD2PrtAcX0LMpPMZgAAAAAAAAAAAAAAAAAAAAAAAPA/tTfrXf/28/X1/Hk/P981r827f3w+P5/P7/dH41rN/c5sP18/P9/P8+v18/n5fP/3f30/Xy+/15/N58/n+339/Pj1/Xw/3y/f7+v7+Xw/36+f7+fr/Xy/Xj+fr+f79fN8v37t/eO/s/18vx6/33+vj1+vH8/3+33+fnw/X+/n++Xz/f7v/Wf+z3739P/+AIAAAAAAAAAAAAAAAAAAAAAYB/pX/7/9f2+fr5e/57Xp//t+Xn+fP5+v5/v9/Pj+ft8v16/H8/36+fz8/n8/Hw/z/drx/P9+nH9fr9eP57v14/n+/Xz+X59v349n+/Xj+f79fN5/369fp7Pj1+vP5+f7/f7+X79fN7/eD5fP5/v9/P9+vl+/fH5fAAAAAAAAAAAAAAAAAAAAAAA+Lt+9t4+N0P2d+N7/3w+X2+P7/f74/n+eP1+vN8ev95/d38+H+9/+/v7+3w/3+9fv3b/eD4/nh+/nh+vX7s/P56v7+eP+ffn+3w/369fuz+e7/f74/l+v94/3+9fv3Z/PN/vj8f3+/3x/Pf8/ng+n+/Xj+f7/X5+vX5+PZ/v16/Pz+fH8/2/fn7+fr8+nt/P5+v79fP9+vN+fX4+v59f/7o/9A8AAAAAAAAAAAAAAAAAAAAAAAD4v/wA2J5qTz4A+U0AAAAASUVORK5CYII='
+            }
         };
 
-        function log(message) {
-            const consoleBody = document.getElementById('consoleBody');
-            consoleBody.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${message}</div>`;
-            consoleBody.scrollTop = consoleBody.scrollHeight;
-        }
+        const defaultAvatar = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAIoSURBVHhe7dxBSuNAEAXgr9go1q71CLuK4B2EuxbsXcQjOBCs/Qh2VvYGdlYQ/MMoZJLsP4iQMvNMfPBBgpm8uSTJSj01GIZhGIZhGIZhGIZhGIZhOAVkWRZ4vV4U371er/P5/JjW6wGCIODxeND9fr/r8XgY27Zl37Zt2dGyrIzy/fP50P1+12vVSoV8PnfqtVqlz+dz6+l0qtfrVfX7/Vqj0dAFGg2H4XA4rFqthlqtBgSBTCbDNE3bNnC73eZ2u8nu9/tEPM/T/X4XmUwGo9EIBoMB7vd78jwPCIIY27YhSRLkeR7z+RySSAShUAg4nU5hNpsZ27ZhaZqU1dX19fX1dbPZbLJarWRZFsYY6vU65nkecrkcbreb7HK5/P1eX18jSRLcbjds26ZQKGA2m4V0Op0eX1+v14+n0+mxbduyrKzKsuzy8nK51WpVNpvdajaboCiKwOPx+Hy+qFarvF6vR6NRoNVqQRRFQRRFoSiKiKJo6JpGvV6v1+tF33K5rKurq+v1Gk3TNE0jh8NR9XrdbrdbUavVkCTJsmxZlmVZlmVZlmVZlmVZlmVZlmVZljW6/v5+X1+vP99//vjx4/fvX9//d776+q4qimJaX1/X3/9eH39/fV3/7w8AGIZhGIZhGIZhGIZhGIbhdMvL/wDqgB+wZ4o81AAAAABJRU5ErkJggg==';
 
-        function getLogoUrl() {
-            const customUrl = document.getElementById('customLogoUrl').value.trim();
-            if (customUrl) return customUrl;
-            return schools[document.getElementById('schoolId').value].logo;
-        }
+        // --- CORE FUNCTIONS ---
+        const loadImage = (src) => new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+            img.src = src;
+        });
         
-        async function generateCard(firstName, lastName, studentId, faculty, school) {
-            log('正在生成学生证...');
+        async function generateCard(data) {
             const canvas = document.getElementById('studentCard');
             const ctx = canvas.getContext('2d');
             canvas.width = 500;
@@ -115,26 +109,15 @@
             ctx.roundRect(10, 10, canvas.width - 20, 75, [12, 12, 0, 0]);
             ctx.fill();
 
-            const loadImage = (src) => new Promise((resolve, reject) => {
-                const img = new Image();
-                img.crossOrigin = 'anonymous';
-                img.onload = () => resolve(img);
-                img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
-                img.src = src;
-            });
-
             try {
-                const logo = await loadImage(getLogoUrl());
+                const logo = await loadImage(data.school.logo);
                 ctx.fillStyle = 'white';
                 ctx.beginPath();
                 ctx.roundRect(30, 22, 50, 50, 8);
                 ctx.fill();
-                ctx.drawImage(logo, 35, 27, 40, 40);
-                
-                // --- 这是关键的修复 ---
-                const avatar = await loadImage('assets/avatar.png'); 
-                // --- 结束修复 ---
+                ctx.drawImage(logo, 30, 22, 50, 50);
 
+                const avatar = await loadImage(data.photo);
                 ctx.beginPath();
                 ctx.roundRect(30, 105, 90, 90, 8);
                 ctx.clip();
@@ -144,7 +127,7 @@
                 ctx.fillStyle = 'white';
                 ctx.font = 'bold 16px "Segoe UI", Arial, sans-serif';
                 ctx.textAlign = 'left';
-                const schoolNameLines = school.name.split('\n');
+                const schoolNameLines = data.school.name.split('\n');
                 schoolNameLines.forEach((line, index) => ctx.fillText(line, 95, 38 + (index * 18)));
                 ctx.font = '11px "Segoe UI", Arial, sans-serif';
                 ctx.fillText('INTERNATIONAL STUDENT ID CARD', 95, 75);
@@ -156,9 +139,9 @@
                 ctx.fillText('FACULTY:', 140, 190);
 
                 ctx.font = '20px "Segoe UI", Arial, sans-serif';
-                ctx.fillText(`${firstName} ${lastName}`, 240, 130);
-                ctx.fillText(studentId, 295, 160);
-                ctx.fillText(faculty, 260, 190);
+                ctx.fillText(`${data.firstName} ${data.lastName}`, 240, 130);
+                ctx.fillText(data.studentId, 295, 160);
+                ctx.fillText(data.faculty, 260, 190);
 
                 ctx.strokeStyle = '#e5e7eb';
                 ctx.lineWidth = 1.5;
@@ -181,38 +164,71 @@
                 const formatDate = (date) => date.toISOString().split('T')[0];
                 ctx.fillText(formatDate(issueDate), canvas.width * 0.25 + 10, 275);
                 ctx.fillText(formatDate(validDate), canvas.width * 0.75 - 10, 275);
-                log('学生证生成成功。');
             } catch (error) {
-                log(`错误: ${error.message}`);
+                console.error(error);
+                ctx.fillStyle = 'red';
+                ctx.textAlign = 'center';
+                ctx.fillText('Error: Image failed to load.', canvas.width / 2, canvas.height/2);
             }
         }
 
-        function showModal() { document.getElementById('previewModal').classList.add('show'); }
-        function closeModal() { document.getElementById('previewModal').classList.remove('show'); }
-
-        async function startVerification() {
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const studentId = document.getElementById('studentId').value;
-            const faculty = document.getElementById('faculty').value;
-            const school = schools[document.getElementById('schoolId').value];
-            await generateCard(firstName, lastName, studentId, faculty, school);
-            showModal();
+        // --- EVENT HANDLERS ---
+        async function generateAndShowCard() {
+            const data = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                studentId: document.getElementById('studentId').value,
+                faculty: document.getElementById('faculty').value,
+                school: schools[document.getElementById('schoolId').value],
+                photo: document.getElementById('photoUpload').files[0] ? URL.createObjectURL(document.getElementById('photoUpload').files[0]) : defaultAvatar
+            };
+            
+            document.getElementById('preview-placeholder').style.display = 'none';
+            document.getElementById('preview-container').style.display = 'block';
+            await generateCard(data);
         }
 
-        function confirmAndSubmit() { 
-            // This would contain the logic to submit the form data
-            closeModal();
-            log('已确认并提交 (功能待实现)');
+        function generateRandom() {
+            const firstNames = ["SODT", "EVBAW", "ALEX", "JOHN"];
+            const lastNames = ["XIVWIO", "DAUVM", "DOE", "SMITH"];
+            const majors = ["Medicine", "Engineering", "Arts", "Science"];
+
+            document.getElementById('firstName').value = firstNames[Math.floor(Math.random() * firstNames.length)];
+            document.getElementById('lastName').value = lastNames[Math.floor(Math.random() * lastNames.length)];
+            document.getElementById('studentId').value = `INT${Math.floor(100000 + Math.random() * 900000)}`;
+            document.getElementById('faculty').value = majors[Math.floor(Math.random() * majors.length)];
+
+            const schoolKeys = Object.keys(schools);
+            document.getElementById('schoolId').value = schoolKeys[Math.floor(Math.random() * schoolKeys.length)];
+            
+            // Clear file input for photo
+            document.getElementById('photoUpload').value = '';
+            
+            generateAndShowCard();
         }
 
+        function downloadCard() {
+            const canvas = document.getElementById('studentCard');
+            const link = document.createElement('a');
+            link.download = 'student-id.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        function submitVerification() {
+             alert('This would submit the generated image to your server/worker.');
+        }
+
+        // --- INITIALIZATION ---
         window.onload = () => {
-            // Set default values
-            document.getElementById('firstName').value = "SODT";
-            document.getElementById('lastName').value = "XIVWIO";
-            document.getElementById('email').value = "test@nfe.edu";
-            document.getElementById('birthDate').value = "2002-01-01";
-            log('系统就绪。');
+            const schoolSelect = document.getElementById('schoolId');
+            Object.keys(schools).forEach(key => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = schools[key].name.split('\n')[0]; // Show first line of name
+                schoolSelect.appendChild(option);
+            });
+            generateRandom(); // Generate random data on load
         };
     </script>
 </body>
