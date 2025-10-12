@@ -764,7 +764,7 @@
                     <div class="form-group">
                         <label data-i18n="school">学校</label>
                         <select id="schoolId" onchange="updateEmailDomain()">
-                            <option value="10284189">cbs</option>
+                            <option value="1236">fhsu</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -1072,11 +1072,11 @@
         
         // 全局学校配置
         const schools = {
-            '10284189': {
-                name: 'cbs Norddeutscher Fachverband Elektro- Und Informationstechnik E.V. (Hamburg)',
-                idExtended: '10284189',
-                domain: 'cbs.EDU',
-                logo: 'assets/cbs.png'
+            '1236': {
+                name: 'Fort Hays State University (Hays, KS)',
+                idExtended: '1236',
+                domain: 'fhsu.EDU',
+                logo: 'assets/fhsu.png'
             },
         };
         
@@ -1331,7 +1331,7 @@
             ctx.font = 'bold 36px Arial'; // Slightly smaller font for long name
             ctx.textAlign = 'center';
             // Wrap the long school name
-            const schoolName = 'CBS International Business School - Campus Neuss (Neuss)';
+            const schoolName = 'fhsu International Business School - Campus Neuss (Neuss)';
             const words = schoolName.split(' ');
             let line = '';
             let y = 70;
