@@ -30,7 +30,7 @@
             font-family: 'Segoe UI', 'SF Pro Text', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: #450606;
             min-height: 100vh;
-            display: flex;
+            display: ex;
             flex-direction: column;
             color: #1a1a1a;
         }
@@ -764,7 +764,7 @@
                     <div class="form-group">
                         <label data-i18n="school">学校</label>
                         <select id="schoolId" onchange="updateEmailDomain()">
-                            <option value="1236">fhsu</option>
+                            <option value="650363">Grace Bible College (Wyoming, MI)</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -1072,11 +1072,11 @@
         
         // 全局学校配置
         const schools = {
-            '1236': {
-                name: 'Fort Hays State University (Hays, KS)',
-                idExtended: '1236',
-                domain: 'fhsu.EDU',
-                logo: 'assets/fhsu.png'
+            '650363': {
+                name: ' Grace Bible College (Wyoming, MI)',
+                idExtended: '650363',
+                domain: 'Grace Bible College (Wyoming, MI).EDU',
+                logo: 'assets/Grace Bible College (Wyoming, MI).png'
             },
         };
         
@@ -1332,7 +1332,7 @@
             ctx.textAlign = 'center';
             ctx.fillText('STUDENT CARD', canvas.width / 2, 80);
             // Wrap the long school name
-            const schoolName = 'Fort Hays State University (Hays, KS)';
+            const schoolName = ' Grace Bible College (Wyoming, MI)';
             const words = schoolName.split(' ');
             let line = '';
             let y = 120;
