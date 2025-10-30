@@ -764,7 +764,7 @@
                     <div class="form-group">
                         <label data-i18n="school">学校</label>
                         <select id="schoolId" onchange="updateEmailDomain()">
-                            <option value="1576">J Sargeant Reynolds Community College (Richmond, VA)</option>
+                            <option value="11268601">Academy Of Learning Career College (High River, AB)</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -1072,11 +1072,11 @@
         
         // 全局学校配置
         const schools = {
-            '1576': {
-                name: 'J Sargeant Reynolds Community College (Richmond, VA)',
-                idExtended: '1576',
-                domain: 'jsrcc.EDU',
-                logo: 'assets/jsrcc.png'
+            '11268601': {
+                name: 'Academy Of Learning Career College (High River, AB)',
+                idExtended: '11268601',
+                domain: 'aocc.EDU',
+                logo: 'assets/aocc.png'
             },
         };
         
@@ -1332,7 +1332,7 @@
             ctx.textAlign = 'center';
             ctx.fillText('STUDENT CARD', canvas.width / 2, 80);
             // Wrap the long school name
-            const schoolName = ' J Sargeant Reynolds Community College (Richmond, VA)';
+            const schoolName = ' Academy Of Learning Career College (High River, AB)';
             const words = schoolName.split(' ');
             let line = '';
             let y = 120;
