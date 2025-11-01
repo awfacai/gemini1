@@ -1423,7 +1423,8 @@ async function generateCard(firstName, lastName) {
                 
                 
                 // --- 4. 页脚日期 ---
-                const dateY = footerY + 50;
+                // 修复：将 Y 坐标向上调整，使其在画布内
+                const dateY = footerY + 30; // 原来是 + 50
                 
                 // 签发日期 (使用原代码的硬编码日期)
                 ctx.fillStyle = '#555';
@@ -1487,7 +1488,8 @@ async function generateCard(firstName, lastName) {
         drawInfoField(ctx, '院系/专业', 'Faculty of Medicine', infoX, infoY);
         
         // 绘制页脚
-        const dateY = footerY + 50;
+        // 修复：同样在 Fallback 中将 Y 坐标向上调整
+        const dateY = footerY + 30; // 原来是 + 50
         ctx.fillStyle = '#555';
         ctx.font = '24px "Segoe UI", Arial, sans-serif';
         ctx.textAlign = 'left';
