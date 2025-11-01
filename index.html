@@ -1340,7 +1340,7 @@ async function generateCard(firstName, lastName) {
     // 标题 - 中文（右对齐，模拟布局）
     ctx.font = 'bold 24px SimHei, Arial'; // 使用中文字体fallback
     ctx.textAlign = 'right';
-    ctx.fillText('赫奇金斯研究所 (圣莱昂, UT)', canvas.width - 60, 95);
+    ctx.fillText('INTERNATIONAL STUDENT ID CARD', canvas.width - 60, 95);
     
     // Logo（保留原有逻辑，置于左上头部内）
     const logoUrl = getLogoUrl(); // 假设为赫奇金斯logo（圆形带矿镐）
@@ -1387,7 +1387,7 @@ async function generateCard(firstName, lastName) {
                 
                 // 中文姓名（下方，假设音译）
                 ctx.font = 'bold 24px SimHei, Arial';
-                ctx.fillText('INTERNATIONAL STUDENT ID CARD', 220, infoY + 70); // 示例音译，可参数化
+                ctx.fillText('', 220, infoY + 70); // 示例音译，可参数化
                 
                 // ID号（下方）
                 ctx.font = 'bold 24px Arial';
