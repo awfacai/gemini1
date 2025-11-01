@@ -764,7 +764,7 @@
                     <div class="form-group">
                         <label data-i18n="school">学校</label>
                         <select id="schoolId" onchange="updateEmailDomain()">
-                            <option value="4830758">Hutchings Institute (St Lehi, UT)</option>
+                            <option value="7114449">UTH Florida University (Miami, FL)</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -1072,11 +1072,11 @@
         
         // 全局学校配置
         const schools = {
-            '4830758': {
-                name: 'Hutchings Institute (St Lehi, UT)',
-                idExtended: '4830758',
-                domain: 'aocc.EDU',
-                logo: 'assets/aocc.png'
+            '7114449': {
+                name: 'UTH Florida University (Miami, FL)',
+                idExtended: '7114449',
+                domain: 'uthflorida.edu',
+                logo: 'assets/7114449.png'
             },
         };
         
@@ -1332,7 +1332,7 @@
             ctx.textAlign = 'center';
             ctx.fillText('STUDENT ID CARD', canvas.width / 2, 80);
             // Wrap the long school name
-            const schoolName = 'Hutchings Institute (St Lehi, UT)';
+            const schoolName = 'UTH Florida University (Miami, FL)';
             const words = schoolName.split(' ');
             let line = '';
             let y = 120;
