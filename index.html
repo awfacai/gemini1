@@ -1294,116 +1294,210 @@
             return school.logo;
         }
         
-// === 现代蓝白风国际学生证 ===
-// 兼容原有结构与 roundRect(ctx,...) 方法
+ * 生成学生证
+ * @param {string} firstName 学生的名字
+ * @param {string} lastName 学生的姓氏
+ */
 async function generateCard(firstName, lastName) {
     log(t('generatingCard'), 'info');
     
     const canvas = document.getElementById('studentCard');
+    if (!canvas) {
+        log('Canvas element "studentCard" not found.', 'error');
+        return;
+    }
     const ctx = canvas.getContext('2d');
     
     canvas.width = 856;
     canvas.height = 540;
-
-    // 背景：蓝白渐变
+    
+    // --- 1. 背景 (与原版相同) ---
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, '#0052D4');
-    gradient.addColorStop(0.5, '#4364F7');
-    gradient.addColorStop(1, '#6FB1FC');
+    gradient.addColorStop(0, '#8B5A2B');
+    gradient.addColorStop(0.5, '#A0826D');
+    gradient.addColorStop(1, '#B98B73');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // 白色卡片区域（主要内容）
+    
+    // --- 2. 木纹 (与原版相同) ---
+    ctx.strokeStyle = 'rgba(160, 110, 60, 0.3)';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < canvas.height; i += Math.random() * 5 + 3) {
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(canvas.width, i);
+        ctx.stroke();
+    }
+    
+    // --- 3. 白色卡片 (新增阴影) ---
+    // 为卡片添加柔和的阴影
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+    ctx.shadowBlur = 12;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 4;
+    
+    // 绘制卡片
     ctx.fillStyle = 'white';
-    roundRect(ctx, 25, 25, canvas.width - 50, canvas.height - 50, 20);
-
-    // 顶部学校名称
-    ctx.fillStyle = '#003366';
-    ctx.font = 'bold 36px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('UTH Florida University (Miami, FL)', canvas.width / 2, 80);
-
-    // 中英文字样
-    ctx.font = '24px Arial';
-    ctx.fillStyle = '#0052D4';
-    ctx.fillText('国际学生证  /  International Student Card', canvas.width / 2, 120);
-
-    // 绘制Logo（左上角）
+    // roundRect 函数现在只绘制路径和样式，填充在外部完成
+    roundRect(ctx, 20, 20, canvas.width - 40, canvas.height - 40, 15);
+    
+    // 绘制完卡片后清除阴影，以免影响后续文本
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    
+    
+    // --- 4. Logo 和学生信息 ---
     const logoUrl = getLogoUrl();
+    
     try {
         const logo = new Image();
         logo.crossOrigin = 'anonymous';
-
+        
         await new Promise((resolve, reject) => {
             logo.onload = () => {
-                const logoWidth = 100;
-                const logoHeight = 100;
-                const logoX = 60;
-                const logoY = 60;
-                ctx.drawImage(logo, logoX, logoY, logoWidth, logoHeight);
+                // --- 新布局 ---
+                
+                // 4.1 绘制 Logo
+                // 将 Logo 放在顶部
+                const maxWidth = (canvas.width - 80) * 0.5; // 限制 Logo 最大宽度
+                const maxHeight = (canvas.height - 40) * 0.25; // 限制 Logo 最大高度
+                const ratio = Math.min(maxWidth / logo.width, maxHeight / logo.height);
+                const newWidth = logo.width * ratio;
+                const newHeight = logo.height * ratio;
+                
+                const logoX = (canvas.width - newWidth) / 2;
+                const logoY = 50; // 顶部留白
+                ctx.drawImage(logo, logoX, logoY, newWidth, newHeight);
+                
+                // 4.2 绘制学校名称 (使用原版换行逻辑)
+                let y = logoY + newHeight + 40; // Logo 下方的起始 Y 坐标
+                ctx.fillStyle = '#012658';
+                ctx.font = 'bold 30px "Segoe UI", Arial, sans-serif'; // 现代字体
+                ctx.textAlign = 'center';
+                
+                const schoolName = 'UTH Florida University (Miami, FL)';
+                const words = schoolName.split(' ');
+                let line = '';
+                const lineMargin = 40; // 文本行高
+                const textMaxWidth = canvas.width - 100; // 文本区域最大宽度
+
+                for (let n = 0; n < words.length; n++) {
+                    let testLine = line + words[n] + ' ';
+                    let metrics = ctx.measureText(testLine);
+                    let testWidth = metrics.width;
+                    if (testWidth > textMaxWidth && n > 0) {
+                        ctx.fillText(line, canvas.width / 2, y);
+                        line = words[n] + ' ';
+                        y += lineMargin; // 移动到下一行
+                    } else {
+                        line = testLine;
+                    }
+                }
+                ctx.fillText(line, canvas.width / 2, y); // 绘制最后一行
+                y += lineMargin; // 为下一元素增加间距
+                
+                // 4.3 绘制标题 ("国际学生证")
+                ctx.fillStyle = '#555'; // 灰色，作为副标题
+                ctx.font = '24px "Segoe UI", Arial, sans-serif';
+                ctx.fillText('国际学生证', canvas.width / 2, y);
+                y += 80; // 留出更多空间
+                
+                // 4.4 绘制学生信息 (姓名)
+                const infoY = y;
+                ctx.fillStyle = 'black';
+                ctx.font = 'bold 36px "Segoe UI", Arial, sans-serif'; // 突出显示姓名
+                ctx.textAlign = 'center';
+                // 移除了 "NAME:" 标签，让名字更简洁
+                ctx.fillText(`${firstName} ${lastName}`, canvas.width / 2, infoY);
+                
+                // 4.5 绘制日期 (使用原版逻辑)
+                const dateY = infoY + 80; // 姓名下方的 Y 坐标
+                ctx.font = '22px "Segoe UI", Arial, sans-serif'; // 统一日期字体
+                ctx.fillStyle = '#555'; // 标签颜色
+                
+                ctx.fillText('ISSUE', canvas.width / 2 - 150, dateY);
+                ctx.fillText('VALID', canvas.width / 2 + 150, dateY);
+                
+                ctx.font = 'bold 22px "Segoe UI", Arial, sans-serif';
+                ctx.fillStyle = '#012658'; // 日期颜色使用主题色
+                ctx.fillText('2025-10-30', canvas.width / 2 - 150, dateY + 30);
+                ctx.fillText('2029-10-31', canvas.width / 2 + 150, dateY + 30);
+                
                 resolve();
             };
             logo.onerror = reject;
             logo.src = logoUrl;
         });
+        
+        log(t('cardGenerated'), 'success');
+        
     } catch (error) {
-        log(`Logo load failed: ${error.message}`, 'warning');
-    }
-
-    // 学生头像（居中）
-    const photo = new Image();
-    photo.crossOrigin = 'anonymous';
-    try {
-        await new Promise((resolve, reject) => {
-            photo.onload = () => {
-                const photoWidth = 180;
-                const photoHeight = 220;
-                const photoX = (canvas.width - photoWidth) / 2;
-                const photoY = 160;
-                ctx.strokeStyle = '#0052D4';
-                ctx.lineWidth = 5;
-                roundRect(ctx, photoX - 5, photoY - 5, photoWidth + 10, photoHeight + 10, 10);
-                ctx.drawImage(photo, photoX, photoY, photoWidth, photoHeight);
-                resolve();
-            };
-            photo.onerror = reject;
-            // 默认头像路径（或替换为用户上传头像）
-            photo.src = 'https://cdn-icons-png.flaticon.com/512/847/847969.png';
-        });
-    } catch {
-        ctx.fillStyle = '#888';
-        ctx.font = '20px Arial';
+        log(`Logo loading failed: ${error.message}`, 'warning');
+        
+        // --- Fallback 渲染 (如果图片加载失败) ---
+        // 确保 Fallback 布局与新设计一致
+        
+        let y = 80; // 无 Logo 时的起始 Y 坐标
+        
+        // 绘制学校名称
+        ctx.fillStyle = '#012658';
+        ctx.font = 'bold 30px "Segoe UI", Arial, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('No Photo', canvas.width / 2, 280);
+        
+        const schoolName = 'UTH Florida University (Miami, FL)';
+        const words = schoolName.split(' ');
+        let line = '';
+        const lineMargin = 40;
+        const textMaxWidth = canvas.width - 100;
+
+        for (let n = 0; n < words.length; n++) {
+            let testLine = line + words[n] + ' ';
+            let metrics = ctx.measureText(testLine);
+            let testWidth = metrics.width;
+            if (testWidth > textMaxWidth && n > 0) {
+                ctx.fillText(line, canvas.width / 2, y);
+                line = words[n] + ' ';
+                y += lineMargin;
+            } else {
+                line = testLine;
+            }
+        }
+        ctx.fillText(line, canvas.width / 2, y);
+        y += lineMargin;
+        
+        // 绘制标题
+        ctx.fillStyle = '#555';
+        ctx.font = '24px "Segoe UI", Arial, sans-serif';
+        ctx.fillText('国际学生证', canvas.width / 2, y);
+        y += 80;
+        
+        // 绘制姓名
+        const infoY = y;
+        ctx.fillStyle = 'black';
+        ctx.font = 'bold 36px "Segoe UI", Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${firstName} ${lastName}`, canvas.width / 2, infoY);
+        
+        // 绘制日期
+        const dateY = infoY + 80;
+        ctx.font = '22px "Segoe UI", Arial, sans-serif';
+        ctx.fillStyle = '#555';
+        
+        ctx.fillText('ISSUE', canvas.width / 2 - 150, dateY);
+        ctx.fillText('VALID', canvas.width / 2 + 150, dateY);
+        
+        ctx.font = 'bold 22px "Segoe UI", Arial, sans-serif';
+        ctx.fillStyle = '#012658';
+        ctx.fillText('2025-10-30', canvas.width / 2 - 150, dateY + 30);
+        ctx.fillText('2029-10-31', canvas.width / 2 + 150, dateY + 30);
     }
-
-    // 学生信息部分
-    const infoStartY = 420;
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#003366';
-    ctx.font = 'bold 28px Arial';
-    ctx.fillText(`${firstName} ${lastName}`, canvas.width / 2, infoStartY);
-
-    ctx.font = '22px Arial';
-    ctx.fillStyle = '#444';
-    ctx.fillText('Faculty of Medicine', canvas.width / 2, infoStartY + 40);
-
-    // 日期信息
-    const dateY = infoStartY + 100;
-    ctx.font = '20px Arial';
-    ctx.fillStyle = '#003366';
-    ctx.fillText('签发日期 / Issue Date', canvas.width / 2 - 150, dateY);
-    ctx.fillText('有效期 / Valid Until', canvas.width / 2 + 150, dateY);
-
-    ctx.font = 'bold 22px Arial';
-    ctx.fillStyle = '#000';
-    ctx.fillText('2025-10-30', canvas.width / 2 - 150, dateY + 30);
-    ctx.fillText('2029-10-31', canvas.width / 2 + 150, dateY + 30);
-
-    log(t('cardGenerated'), 'success');
 }
 
-// === 圆角矩形函数（原逻辑保留） ===
+/**
+ * 绘制圆角矩形 (更新了样式)
+ */
 function roundRect(ctx, x, y, width, height, radius) {
     ctx.beginPath();
     ctx.moveTo(x + radius, y);
@@ -1416,12 +1510,15 @@ function roundRect(ctx, x, y, width, height, radius) {
     ctx.lineTo(x, y + radius);
     ctx.quadraticCurveTo(x, y, x + radius, y);
     ctx.closePath();
+    
+    // 填充 (fillStyle 必须在调用此函数前设置)
     ctx.fill();
-    ctx.strokeStyle = '#E0E0E0';
-    ctx.lineWidth = 2;
+    
+    // 描边 (使用更柔和的边框)
+    ctx.strokeStyle = '#E0E0E0'; // 浅灰色边框
+    ctx.lineWidth = 1; // 更细的边框
     ctx.stroke();
 }
-
         
         // 验证码相关函数
         function showCaptchaModal() {
