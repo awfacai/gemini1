@@ -1332,130 +1332,159 @@ async function generateCard(firstName, lastName) {
     const footerY = bodyY + bodyHeight;
     
     // --- 2. Logo 和页眉文本 ---
-    const logoUrl = getLogoUrl();
     
+    let logo, photo; // 在 try 外部声明，以便 fallback 可以访问
+
     try {
-        const logo = new Image();
-        logo.crossOrigin = 'anonymous';
+        // --- NEW: 加载图片 ---
+        const logoUrl = getLogoUrl();
+        const randomAvatarId = Math.floor(Math.random() * 100) + 1; // 1-100 随机数
+        const photoUrl = `https://ps.iaw.pp.ua/avatars/men/${randomAvatarId}.jpg`;
+
+        // 并行加载 logo 和 photo
+        const results = await Promise.allSettled([
+            loadImage(logoUrl),
+            loadImage(photoUrl)
+        ]);
+
+        if (results[0].status === 'fulfilled') {
+            logo = results[0].value;
+        } else {
+            log(`Logo loading failed: ${results[0].reason.message}`, 'warning');
+        }
         
-        await new Promise((resolve, reject) => {
-            logo.onload = () => {
-                // --- 新布局 ---
-                
-                // 2.1 绘制 Logo (左上角)
-                const logoSize = 80;
-                const logoMargin = (headerHeight - logoSize) / 2; // 上下居中
-                const logoX = 30;
-                const logoY = logoMargin;
-                
-                // 绘制圆形裁切 (模拟图片中的圆形 logo)
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, Math.PI * 2, true);
-                ctx.closePath();
-                ctx.clip();
-                ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
-                ctx.restore(); // 恢复画布状态，取消裁切
-                
-                // 2.2 绘制学校名称 (使用原版换行逻辑)
-                const textX = logoX + logoSize + 20;
-                let y = 50; // 页眉内文本的起始 Y 坐标
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 30px "Segoe UI", Arial, sans-serif';
-                ctx.textAlign = 'left'; // 改为左对齐
-                
-                const schoolName = 'UTH Florida University (Miami, FL)'; // 使用原代码的变量
-                const words = schoolName.split(' ');
-                let line = '';
-                const lineMargin = 38;
-                const textMaxWidth = canvas.width - textX - 30; // 文本区域最大宽度
+        if (results[1].status === 'fulfilled') {
+            photo = results[1].value;
+        } else {
+            log(`Photo loading failed: ${results[1].reason.message}`, 'warning');
+            // 'photo' 将保持 undefined, 后面会绘制占位符
+        }
+        
+        // --- 绘制逻辑 ---
 
-                for (let n = 0; n < words.length; n++) {
-                    let testLine = line + words[n] + ' ';
-                    let metrics = ctx.measureText(testLine);
-                    let testWidth = metrics.width;
-                    if (testWidth > textMaxWidth && n > 0) {
-                        ctx.fillText(line, textX, y);
-                        line = words[n] + ' ';
-                        y += lineMargin;
-                    } else {
-                        line = testLine;
-                    }
-                }
-                // 注意：由于空间限制，第二行可能绘制不下，此处只绘制第一行
-                // 如果需要完整换行，需要减小字号或增加页眉高度
-                if (y === 50) { // 如果只有一行
-                    ctx.fillText(line, textX, y);
-                } else {
-                    // 如果换行了，可能空间不够，只画第一行
-                    ctx.fillText(words.join(' '), textX, y); 
-                }
-                
+        // 2.1 绘制 Logo (左上角)
+        let textX = 30; // 默认文本 X 坐标 (无 logo)
+        if (logo) {
+            const logoSize = 80;
+            const logoMargin = (headerHeight - logoSize) / 2; // 上下居中
+            const logoX = 30;
+            const logoY = logoMargin;
+            textX = logoX + logoSize + 20; // 更新文本 X 坐标
+            
+            // 绘制圆形裁切 (模拟图片中的圆形 logo)
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, Math.PI * 2, true);
+            ctx.closePath();
+            ctx.clip();
+            ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+            ctx.restore(); // 恢复画布状态，取消裁切
+        } else {
+            log('Logo image not loaded, skipping draw.', 'info');
+        }
+        
+        // 2.2 绘制学校名称 (使用原版换行逻辑)
+        let y = 50; // 页眉内文本的起始 Y 坐标
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 30px "Segoe UI", Arial, sans-serif';
+        ctx.textAlign = 'left'; // 改为左对齐
+        
+        const schoolName = 'UTH Florida University (Miami, FL)'; // 使用原代码的变量
+        const words = schoolName.split(' ');
+        let line = '';
+        const lineMargin = 38;
+        const textMaxWidth = canvas.width - textX - 30; // 文本区域最大宽度
 
-                // 2.3 绘制标题 ("国际学生证")
-                ctx.font = '24px "Segoe UI", Arial, sans-serif';
-                ctx.fillText('国际学生证', textX, y + 40);
-                
-                
-                // --- 3. 内容区 ---
-                
-                // 3.1 绘制照片占位符
-                const photoX = 40;
-                const photoY = bodyY + 30;
-                const photoSize = 220;
-                ctx.fillStyle = '#E0E0E0'; // 灰色占位符
-                roundRect(ctx, photoX, photoY, photoSize, photoSize, 15); // 使用 roundRect
-                
-                // 3.2 绘制学生信息
-                const infoX = photoX + photoSize + 40;
-                let infoY = bodyY + 60;
-                
-                // 姓名 (来自函数参数)
-                drawInfoField(ctx, '姓名', `${firstName} ${lastName}`, infoX, infoY);
-                infoY += 80;
-                
-                // 学号 (硬编码以匹配布局)
-                drawInfoField(ctx, '学号', 'INT524327', infoX, infoY);
-                infoY += 80;
-                
-                // 院系/专业 (硬编码以匹配布局)
-                drawInfoField(ctx, '院系/专业', 'Faculty of Medicine', infoX, infoY);
-                
-                
-                // --- 4. 页脚日期 ---
-                // 修复：将 Y 坐标向上调整，使其在画布内
-                const dateY = footerY + 30; // 原来是 + 50
-                
-                // 签发日期 (使用原代码的硬编码日期)
-                ctx.fillStyle = '#555';
-                ctx.font = '24px "Segoe UI", Arial, sans-serif';
-                ctx.textAlign = 'left';
-                ctx.fillText('签发日期', 40, dateY);
-                ctx.fillStyle = 'black';
-                ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
-                ctx.fillText('2025-10-30', 40, dateY + 35);
-                
-                // 有效期至 (使用原代码的硬编码日期)
-                ctx.fillStyle = '#555';
-                ctx.font = '24px "Segoe UI", Arial, sans-serif';
-                ctx.textAlign = 'right';
-                ctx.fillText('有效期至', canvas.width - 40, dateY);
-                ctx.fillStyle = 'black';
-                ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
-                ctx.fillText('2029-10-31', canvas.width - 40, dateY + 35);
-                
-                resolve();
-            };
-            logo.onerror = reject;
-            logo.src = logoUrl;
-        });
+        for (let n = 0; n < words.length; n++) {
+            let testLine = line + words[n] + ' ';
+            let metrics = ctx.measureText(testLine);
+            let testWidth = metrics.width;
+            if (testWidth > textMaxWidth && n > 0) {
+                ctx.fillText(line, textX, y);
+                line = words[n] + ' ';
+                y += lineMargin;
+            } else {
+                line = testLine;
+            }
+        }
+        // 注意：由于空间限制，第二行可能绘制不下，此处只绘制第一行
+        // 如果需要完整换行，需要减小字号或增加页眉高度
+        if (y === 50) { // 如果只有一行
+            ctx.fillText(line, textX, y);
+        } else {
+            // 如果换行了，可能空间不够，只画第一行
+            ctx.fillText(words.join(' '), textX, y); 
+        }
+        
+        // 2.3 绘制标题 ("国际学生证")
+        ctx.font = '24px "Segoe UI", Arial, sans-serif';
+        ctx.fillText('国际学生证', textX, y + 40);
+        
+        
+        // --- 3. 内容区 ---
+        
+        // 3.1 绘制照片或占位符
+        const photoX = 40;
+        const photoY = bodyY + 30;
+        const photoSize = 220;
+        
+        if (photo) {
+            // 绘制照片
+            ctx.save();
+            roundRect(ctx, photoX, photoY, photoSize, photoSize, 15); // 使用 roundRect 创建路径
+            ctx.clip(); // 裁切
+            ctx.drawImage(photo, photoX, photoY, photoSize, photoSize); // 绘制照片
+            ctx.restore(); // 恢复画布
+        } else {
+            // 绘制照片占位符 (if photo failed to load)
+            ctx.fillStyle = '#E0E0E0'; // 灰色占位符
+            roundRect(ctx, photoX, photoY, photoSize, photoSize, 15); // 使用 roundRect
+        }
+        
+        // 3.2 绘制学生信息
+        const infoX = photoX + photoSize + 40;
+        let infoY = bodyY + 60;
+        
+        // 姓名 (来自函数参数)
+        drawInfoField(ctx, '姓名', `${firstName} ${lastName}`, infoX, infoY);
+        infoY += 80;
+        
+        // 学号 (硬编码以匹配布局)
+        drawInfoField(ctx, '学号', 'INT524327', infoX, infoY);
+        infoY += 80;
+        
+        // 院系/专业 (硬编码以匹配布局)
+        drawInfoField(ctx, '院系/专业', 'Faculty of Medicine', infoX, infoY);
+        
+        
+        // --- 4. 页脚日期 ---
+        // 修复：将 Y 坐标向上调整，使其在画布内
+        const dateY = footerY + 30; // 原来是 + 50
+        
+        // 签发日期 (使用原代码的硬编码日期)
+        ctx.fillStyle = '#555';
+        ctx.font = '24px "Segoe UI", Arial, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('签发日期', 40, dateY);
+        ctx.fillStyle = 'black';
+        ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
+        ctx.fillText('2025-10-30', 40, dateY + 35);
+        
+        // 有效期至 (使用原代码的硬编码日期)
+        ctx.fillStyle = '#555';
+        ctx.font = '24px "Segoe UI", Arial, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText('有效期至', canvas.width - 40, dateY);
+        ctx.fillStyle = 'black';
+        ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
+        ctx.fillText('2029-10-31', canvas.width - 40, dateY + 35);
         
         log(t('cardGenerated'), 'success');
         
     } catch (error) {
-        log(`Logo loading failed: ${error.message}`, 'warning');
+        log(`General card generation error: ${error.message}`, 'error');
         
-        // --- Fallback 渲染 (如果图片加载失败) ---
+        // --- Fallback 渲染 (如果发生意外错误) ---
         // 确保 Fallback 布局与新设计一致
         
         // 绘制页眉文本 (无 logo)
@@ -1549,6 +1578,21 @@ function roundRect(ctx, x, y, width, height, radius) {
     // ctx.strokeStyle = '#E0E0E0';
     // ctx.lineWidth = 1;
     // ctx.stroke();
+}
+
+/**
+ * 异步加载图片
+ * @param {string} src 图片 URL
+ * @returns {Promise<Image>}
+ */
+function loadImage(src) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous'; // 允许跨域加载
+        img.onload = () => resolve(img);
+        img.onerror = (e) => reject(new Error(`Failed to load image: ${src}`));
+        img.src = src;
+    });
 }
         
         // 验证码相关函数
