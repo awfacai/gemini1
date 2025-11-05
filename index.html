@@ -764,7 +764,7 @@
                     <div class="form-group">
                         <label data-i18n="school">学校</label>
                         <select id="schoolId" onchange="updateEmailDomain()">
-                            <option value="7114449">UTH Florida University (Miami, FL)</option>
+                            <option value="651392">Miami Media School (Miami, FL)</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -1072,11 +1072,11 @@
         
         // 全局学校配置
         const schools = {
-            '7114449': {
-                name: 'UTH Florida University (Miami, FL)',
-                idExtended: '7114449',
-                domain: 'uthflorida.edu',
-                logo: 'assets/7114449.png'
+            '651392': {
+                name: 'Miami Media School (Miami, FL)',
+                idExtended: '651392',
+                domain: 'Miami.edu',
+                logo: 'assets/651392.png'
             },
         };
         
@@ -1389,7 +1389,7 @@ async function generateCard(firstName, lastName) {
         ctx.font = 'bold 30px "Segoe UI", Arial, sans-serif';
         ctx.textAlign = 'left'; // 改为左对齐
         
-        const schoolName = 'UTH Florida University (Miami, FL)'; // 使用原代码的变量
+        const schoolName = 'Miami Media School (Miami, FL)'; // 使用原代码的变量
         const words = schoolName.split(' ');
         let line = '';
         const lineMargin = 38;
@@ -1494,7 +1494,7 @@ async function generateCard(firstName, lastName) {
         ctx.font = 'bold 30px "Segoe UI", Arial, sans-serif';
         ctx.textAlign = 'left';
         
-        const schoolName = 'UTH Florida University (Miami, FL)';
+        const schoolName = 'Miami Media School (Miami, FL)';
         ctx.fillText(schoolName, textX, y); // Fallback 不处理换行
         
         ctx.font = '24px "Segoe UI", Arial, sans-serif';
