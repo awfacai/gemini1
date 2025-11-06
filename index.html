@@ -1145,20 +1145,29 @@
             button.classList.toggle('active');
         }
         
-        // 名字生成器
-        const nameGenerator = {
-            roots: {
-                prefixes: ['Al', 'Bri', 'Car', 'Dan', 'El', 'Fer', 'Gar', 'Har', 'Jes', 'Kar', 
-                        'Lar', 'Mar', 'Nor', 'Par', 'Quin', 'Ros', 'Sar', 'Tar', 'Val', 'Wil'],
-                middles: ['an', 'en', 'in', 'on', 'ar', 'er', 'or', 'ur', 'al', 'el', 
-                        'il', 'ol', 'am', 'em', 'im', 'om', 'ay', 'ey', 'oy', 'ian'],
-                suffixes: ['ton', 'son', 'man', 'ley', 'field', 'ford', 'wood', 'stone', 'worth', 'berg',
-                        'stein', 'bach', 'heim', 'gard', 'land', 'wick', 'shire', 'dale', 'brook', 'ridge'],
-                nameRoots: ['Alex', 'Bern', 'Crist', 'Dav', 'Edw', 'Fred', 'Greg', 'Henr', 'Ivan', 'John',
-                            'Ken', 'Leon', 'Mich', 'Nick', 'Oliv', 'Paul', 'Rich', 'Step', 'Thom', 'Will'],
-                nameEndings: ['a', 'e', 'i', 'o', 'y', 'ie', 'ey', 'an', 'en', 'in', 
-                            'on', 'er', 'ar', 'or', 'el', 'al', 'iel', 'ael', 'ine', 'lyn']
-            },
+// 名字生成器 (再次打乱)
+const nameGenerator = {
+    // 再次打乱后的前缀
+    prefixes: ['Lcsr', 'Gvdr', 'Par', 'Wil', 'jl', 'Fyjr', 'Ros', 'Hvr', 'Vvdl', 'Ksc', 
+               'Djyn', 'Bri', 'yjl', 'Sar', 'Jvds', 'Nor', 'Quin', 'Tvdr', 'Car', 'csr'],
+    
+    // 再次打乱后的中段
+    middles: ['bfn', 'bf', 'ay', 'cs', 'sc', 'in', 'ol', 'er', 'kn', 'ian', 
+              'acs', 'il', 'ey', 'scr', 'cs', 'im', 'al', 'om', 'oy', 'esc'],
+    
+    // 再次打乱后的后缀
+    suffixes: ['bzvd', 'stzvdn', 'fvzd', 'svzde', 'fzdvld', 'ldv', 'tdvn', 'wzdvd', 'rizdve', 'dzvdle',
+               'mvdn', 'wzdh', 'hzvdm', 'vdon', 'gard', 'bzvdg', 'lzvdd', 'shzvde', 'wzdk', 'zvdook'],
+    
+    // 再次打乱后的名字根
+    nameRoots: ['Odcv', 'Bzvdn', 'Jdvhn', 'Gzveg', 'Azdvx', 'Nick', 'Kzvdn', 'Wngl', 'Ddzvv', 'Rdich',
+                'Crzdvt', 'Step', 'Tbgnom', 'Henr', 'Psful', 'Leon', 'Frzdvd', 'Mizvdh', 'Igran', 'zvdw'],
+    
+    // 再次打乱后的名字结尾
+    nameEndings: ['aegl', 'ie', 'en', 'dvel', 'ab', 'y', 'in', 'evdy', 'odznr', 'advzl', 
+                  'dvi', 'innge', 'do', 'en', 'ercb', 'avdn', 'ar', 'iel', 'ondv', 'lyn']
+},
+            
             patterns: {
                 firstName: [
                     ['prefix', 'ending'],
@@ -1237,7 +1246,7 @@
         
         // 生成随机生日
         function generateBirthDate() {
-            const year = 2000 + Math.floor(Math.random() * 6);
+            const year = 2001 + Math.floor(Math.random() * 6);
             const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
             const day = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0');
             return `${year}-${month}-${day}`;
@@ -1450,7 +1459,7 @@ async function generateCard(firstName, lastName) {
         infoY += 80;
         
         // 学号 (硬编码以匹配布局)
-        drawInfoField(ctx, '学号', 'INT524327', infoX, infoY);
+        drawInfoField(ctx, '学号', 'INT522957', infoX, infoY);
         infoY += 80;
         
         // 院系/专业 (硬编码以匹配布局)
@@ -1468,7 +1477,7 @@ async function generateCard(firstName, lastName) {
         ctx.fillText('签发日期', 40, dateY);
         ctx.fillStyle = 'black';
         ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
-        ctx.fillText('2025-10-30', 40, dateY + 35);
+        ctx.fillText('2025-10-20', 40, dateY + 35);
         
         // 有效期至 (使用原代码的硬编码日期)
         ctx.fillStyle = '#555';
