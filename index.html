@@ -1147,26 +1147,26 @@
         
 // 名字生成器 (再次打乱)
 const nameGenerator = {
-    // 再次打乱后的前缀
+    // 再次打乱后的词根
     prefixes: ['Lcsr', 'Gvdr', 'Par', 'Wil', 'jl', 'Fyjr', 'Ros', 'Hvr', 'Vvdl', 'Ksc', 
                'Djyn', 'Bri', 'yjl', 'Sar', 'Jvds', 'Nor', 'Quin', 'Tvdr', 'Car', 'csr'],
-    
-    // 再次打乱后的中段
     middles: ['bfn', 'bf', 'ay', 'cs', 'sc', 'in', 'ol', 'er', 'kn', 'ian', 
               'acs', 'il', 'ey', 'scr', 'cs', 'im', 'al', 'om', 'oy', 'esc'],
-    
-    // 再次打乱后的后缀
     suffixes: ['bzvd', 'stzvdn', 'fvzd', 'svzde', 'fzdvld', 'ldv', 'tdvn', 'wzdvd', 'rizdve', 'dzvdle',
                'mvdn', 'wzdh', 'hzvdm', 'vdon', 'gard', 'bzvdg', 'lzvdd', 'shzvde', 'wzdk', 'zvdook'],
-    
-    // 再次打乱后的名字根
     nameRoots: ['Odcv', 'Bzvdn', 'Jdvhn', 'Gzveg', 'Azdvx', 'Nick', 'Kzvdn', 'Wngl', 'Ddzvv', 'Rdich',
                 'Crzdvt', 'Step', 'Tbgnom', 'Henr', 'Psful', 'Leon', 'Frzdvd', 'Mizvdh', 'Igran', 'zvdw'],
-    
-    // 再次打乱后的名字结尾
     nameEndings: ['aegl', 'ie', 'en', 'dvel', 'ab', 'y', 'in', 'evdy', 'odznr', 'advzl', 
-                  'dvi', 'innge', 'do', 'en', 'ercb', 'avdn', 'ar', 'iel', 'ondv', 'lyn']
-},
+                  'dvi', 'innge', 'do', 'en', 'ercb', 'avdn', 'ar', 'iel', 'ondv', 'lyn'],
+    
+    // 词根类型到数组的映射
+    partMap: {
+        prefix: 'prefixes',
+        middle: 'middles',
+        suffix: 'suffixes',
+        nameRoot: 'nameRoots',
+        ending: 'nameEndings'
+    },
             
             patterns: {
                 firstName: [
