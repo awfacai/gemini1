@@ -763,7 +763,7 @@
                 infoY += 80;
                 
                 // 修复: 生成一致的学生ID (基于姓名)
-                const studentId = 'INT' + (firstName + lastName).split('').reduce((a,c) => a + c.charCodeAt(0), 0) % 900000 + 100000;
+                const studentId = 'INT' + (firstName + lastName).split('').reduce((a,c) => a + c.charCodeAt(0), 0) % 9500 + 10952;
                 drawInfoField(ctx, 'STUDENT ID', studentId, infoX, infoY);
                 infoY += 80;
                 
@@ -772,17 +772,17 @@
                 
 // 绘制签发日期（ISSUE）
 // 绘制签发日期（ISSUE / VALID） - 使用硬编码 2025-10-25
-const dateY = bodyY + bodyHeight + 50;
+const dateY = bodyY + bodyHeight + 40;
 
 ctx.fillStyle = '#555';
 ctx.font = '24px "Segoe UI", Arial, sans-serif';
 ctx.textAlign = 'left';
-ctx.fillText('ISSUE', 40, dateY);
+ctx.fillText('ISSUE', 30, dateY);
 
 ctx.fillStyle = 'black';
 ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
 const issueDate = '2025-10-25';
-ctx.fillText(issueDate, 40, dateY + 35);
+ctx.fillText(issueDate, 30, dateY + 25);
 
 // 有效期 (4 年后)
 const validUntil = new Date(issueDate);
@@ -792,11 +792,11 @@ const validStr = validUntil.toISOString().split('T')[0];
 ctx.fillStyle = '#555';
 ctx.font = '24px "Segoe UI", Arial, sans-serif';
 ctx.textAlign = 'right';
-ctx.fillText('VALID', canvas.width - 40, dateY);
+ctx.fillText('VALID', canvas.width - 30, dateY);
 
 ctx.fillStyle = 'black';
 ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
-ctx.fillText(validStr, canvas.width - 40, dateY + 35);
+ctx.fillText(validStr, canvas.width - 30, dateY + 25);
 
 
                 
