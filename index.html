@@ -763,7 +763,7 @@
                 infoY += 80;
                 
                 // 修复: 生成一致的学生ID (基于姓名)
-                const studentId = 'INT' + (firstName + lastName).split('').reduce((a,c) => a + c.charCodeAt(0), 0) % 900000 + 100000;
+                const studentId = 'INT' + (firstName + lastName).split('').reduce((a,c) => a + c.charCodeAt(0), 0) % 96590 + 135380;
                 drawInfoField(ctx, 'STUDENT ID', studentId, infoX, infoY);
                 infoY += 80;
                 
@@ -773,7 +773,7 @@
 const dateY = footerY + 30;
 
 // 硬编码签发日期
-const issueDateStr = '2024-10-20';
+const issueDateStr = '2025-10-20';
 
 // 绘制签发日期
 ctx.fillStyle = '#555';
