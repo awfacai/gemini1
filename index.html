@@ -969,9 +969,9 @@ async function generateCard(firstName, lastName, schoolName) {
         }
         ctx.fillText(line, textX, y);
         
-        // 2.3 绘制标题 ("international student ID card")
+        // 2.3 绘制标题 ("STUDENT ID card")
         ctx.font = '24px "Segoe UI", Arial, sans-serif';
-        ctx.fillText('international student ID card', textX, y + 40);
+        ctx.fillText('STUDENT ID card', textX, y + 40);
         
         
         // --- 3. 内容区 ---
@@ -1051,7 +1051,7 @@ async function generateCard(firstName, lastName, schoolName) {
         ctx.textAlign = 'left';
         ctx.fillText(schoolName, textX, y);
         ctx.font = '24px "Segoe UI", Arial, sans-serif';
-        ctx.fillText('international student ID card', textX, y + 40);
+        ctx.fillText('STUDENT ID card', textX, y + 40);
         
         // 绘制照片占位符
         ctx.fillStyle = '#E0E0E0';
