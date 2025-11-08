@@ -1,1170 +1,1170 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SheerID Verifier</title>
-    <script>
-        window.CONFIG = {
-            workerUrl: "https://gemini.irvv.workers.dev",
-            hcaptcha: {
-                sitekey: ""
-            },
-            turnstile: {
-                sitekey: ""
-            },
-            maxFileSize: 1 * 1024 * 1024
-        };
-    </script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', 'SF Pro Text', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #450606;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            color: #1a1a1a;
-        }
-        
-        .header {
-            background: #fff0;
-            padding: 35px;
-            text-align: center;
-            position: relative;
-        }
-        
-        .header h1 {
-            font-size: 24px;
-            font-weight: 600;
-            color: #1a1a1a;
-            letter-spacing: -0.5px;
-        }
-        
-        .language-selector {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 5px;
-            background: #f0f0f0;
-            padding: 5px;
-            border-radius: 8px;
-        }
-        
-        .lang-btn {
-            padding: 6px 12px;
-            background: transparent;
-            border: none;
-            color: #666;
-            font-size: 13px;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: all 0.2s;
-        }
-        
-        .lang-btn:hover {
-            background: #e0e0e0;
-            color: #333;
-        }
-        
-        .lang-btn.active {
-            background: #1a1a1a;
-            color: #fff;
-        }
-        
-        .main-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            max-width: 1200px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 20px;
-            gap: 20px;
-        }
-        
-        .input-section {
-            background: #fff;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        
-        .url-input-container {
-            position: relative;
-        }
-        
-        .url-input {
-            width: 100%;
-            padding: 16px 20px;
-            font-size: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            transition: all 0.2s;
-            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
-            background: #fafafa;
-        }
-        
-        .url-input:focus {
-            outline: none;
-            border-color: #666;
-            background: #fff;
-        }
-        
-        .verify-button {
-            margin-top: 15px;
-            width: 100%;
-            padding: 14px;
-            background: #1a1a1a;
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .verify-button:hover:not(:disabled) {
-            background: #333;
-            transform: translateY(-1px);
-        }
-        
-        .verify-button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        
-        .advanced-toggle {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
-            text-align: center;
-        }
-        
-        .toggle-button {
-            background: none;
-            border: none;
-            color: #666;
-            font-size: 14px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: color 0.2s;
-        }
-        
-        .toggle-button:hover {
-            color: #1a1a1a;
-        }
-        
-        .toggle-button svg {
-            width: 16px;
-            height: 16px;
-            transition: transform 0.2s;
-        }
-        
-        .toggle-button.active svg {
-            transform: rotate(180deg);
-        }
-        
-        .advanced-settings {
-            display: none;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #f0f0f0;
-        }
-        
-        .advanced-settings.show {
-            display: block;
-        }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .form-group label {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 6px;
-            font-weight: 500;
-        }
-        
-        .form-group input,
-        .form-group select {
-            padding: 10px 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            background: #fafafa;
-            transition: all 0.2s;
-        }
-        
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #666;
-            background: #fff;
-        }
-        
-        .success-modal, .captcha-modal, .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1000;
-            animation: fadeIn 0.3s;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SheerID Verifier</title>
+    <script>
+        window.CONFIG = {
+            workerUrl: "https://gemini.irvv.workers.dev",
+            hcaptcha: {
+                sitekey: ""
+            },
+            turnstile: {
+                sitekey: ""
+            },
+            maxFileSize: 1 * 1024 * 1024
+        };
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'SF Pro Text', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #450606;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #1a1a1a;
+        }
+        
+        .header {
+            background: #fff0;
+            padding: 35px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
+        }
+        
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 5px;
+            background: #f0f0f0;
+            padding: 5px;
+            border-radius: 8px;
+        }
+        
+        .lang-btn {
+            padding: 6px 12px;
+            background: transparent;
+            border: none;
+            color: #666;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        .lang-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .lang-btn.active {
+            background: #1a1a1a;
+            color: #fff;
+        }
+        
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        .input-section {
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .url-input-container {
+            position: relative;
+        }
+        
+        .url-input {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            transition: all 0.2s;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            background: #fafafa;
+        }
+        
+        .url-input:focus {
+            outline: none;
+            border-color: #666;
+            background: #fff;
+        }
+        
+        .verify-button {
+            margin-top: 15px;
+            width: 100%;
+            padding: 14px;
+            background: #1a1a1a;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .verify-button:hover:not(:disabled) {
+            background: #333;
+            transform: translateY(-1px);
+        }
+        
+        .verify-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .advanced-toggle {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+        }
+        
+        .toggle-button {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        
+        .toggle-button:hover {
+            color: #1a1a1a;
+        }
+        
+        .toggle-button svg {
+            width: 16px;
+            height: 16px;
+            transition: transform 0.2s;
+        }
+        
+        .toggle-button.active svg {
+            transform: rotate(180deg);
+        }
+        
+        .advanced-settings {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .advanced-settings.show {
+            display: block;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fafafa;
+            transition: all 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #666;
+            background: #fff;
+        }
+        
+        .success-modal, .captcha-modal, .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
 
-        .success-modal.show, .captcha-modal.show, .modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-overlay, .captcha-modal-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-        }
-        
-        .success-modal-content, .captcha-modal-content, .modal-content {
-            position: relative;
-            background: #fff;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.3s;
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow: auto;
-        }
+        .success-modal.show, .captcha-modal.show, .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-overlay, .captcha-modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        
+        .success-modal-content, .captcha-modal-content, .modal-content {
+            position: relative;
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow: auto;
+        }
 
-        .success-modal-content {
-             padding: 40px;
-        }
+        .success-modal-content {
+             padding: 40px;
+        }
 
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
-            background: #4cd964;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: scaleIn 0.5s;
-        }
-        
-        .success-icon svg {
-            width: 40px;
-            height: 40px;
-            fill: white;
-        }
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: #4cd964;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: scaleIn 0.5s;
+        }
+        
+        .success-icon svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
 
-        .success-redirect-url {
-            font-size: 14px;
-            color: #999;
-            margin-bottom: 20px;
-            word-break: break-all;
-            padding: 10px;
-            background: #f5f5f5;
-            border-radius: 8px;
-            font-family: monospace;
-        }
-        
-        .captcha-container {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-            min-height: 78px;
-        }
+        .success-redirect-url {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 20px;
+            word-break: break-all;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-family: monospace;
+        }
+        
+        .captcha-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            min-height: 78px;
+        }
 
-        .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-body {
-            padding: 20px;
-            text-align: center;
-        }
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 20px;
+            text-align: center;
+        }
 
-        .modal-canvas {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            margin: 20px 0;
-        }
+        .modal-canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+        }
 
-        .console-section {
-            background: #1a1a1a;
-            border-radius: 12px;
-            padding: 0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            overflow: hidden;
-            min-height: 300px;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .console-body {
-            flex: 1;
-            padding: 16px;
-            overflow-y: auto;
-            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
-            font-size: 13px;
-            line-height: 1.6;
-            color: #fff;
-        }
-        
-        .console-line {
-            margin: 4px 0;
-        }
-        
-        .console-time {
-            color: #666;
-        }
-        
-        .console-info { color: #5ac8fa; }
-        .console-success { color: #4cd964; }
-        .console-error { color: #ff3b30; }
-        .console-warning { color: #ff9500; }
-        .console-debug { color: #999; }
-        
-        .loading-spinner {
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 2px solid #333;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-        
-        .loading-spinner.white {
-            border-color: #fff;
-            border-top-color: transparent;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideUp {
-            from {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
+        .console-section {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .console-body {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #fff;
+        }
+        
+        .console-line {
+            margin: 4px 0;
+        }
+        
+        .console-time {
+            color: #666;
+        }
+        
+        .console-info { color: #5ac8fa; }
+        .console-success { color: #4cd964; }
+        .console-error { color: #ff3b30; }
+        .console-warning { color: #ff9500; }
+        .console-debug { color: #999; }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #333;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        .loading-spinner.white {
+            border-color: #fff;
+            border-top-color: transparent;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
 
-        @keyframes scaleIn {
-            from { transform: scale(0); }
-            to { transform: scale(1); }
-        }
-        
-        @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .main-container {
-                padding: 15px;
-            }
-            
-            .language-selector {
-                position: static;
-                margin-top: 10px;
-                justify-content: center;
-            }
-        }
-    </style>
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-container {
+                padding: 15px;
+            }
+            
+            .language-selector {
+                position: static;
+                margin-top: 10px;
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="header">
-        <div class="language-selector">
-            <button class="lang-btn active" onclick="setLanguage(event, 'zh-CN')">简体</button>
-            <button class="lang-btn" onclick="setLanguage(event, 'en')">English</button>
-        </div>
-        <h1><span>SheerID 验证器</span></h1>
-    </div>
-    
-    <div class="main-container">
-        <div class="input-section">
-            <div class="url-input-container">
-                <input type="text" 
-                       id="urlInput" 
-                       class="url-input" 
-                       placeholder="https://services.sheerid.com/verify/67c8c14f5f17a83b745e3f82/?verificationId=689c96eexxxxxxxx"
-                       autocomplete="off">
-            </div>
-            
-            <button class="verify-button" id="verifyButton" onclick="startVerification()">
-                <span>开始验证</span>
-            </button>
-            
-            <div class="advanced-toggle">
-                <button class="toggle-button" onclick="toggleAdvanced()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                    <span>高级设置</span>
-                </button>
-            </div>
-            
-            <div class="advanced-settings" id="advancedSettings">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>名字</label>
-                        <input type="text" id="firstName">
-                    </div>
-                    <div class="form-group">
-                        <label>姓氏</label>
-                        <input type="text" id="lastName">
-                    </div>
-                    <div class="form-group">
-                        <label>邮箱</label>
-                        <input type="email" id="email">
-                    </div>
-                    <div class="form-group">
-                        <label>生日</label>
-                        <input type="date" id="birthDate">
-                    </div>
-                    <div class="form-group">
-                        <label>学校</label>
-                        <select id="schoolId" onchange="updateEmailDomain()">
-                            <option value="651392">Miami Media School (Miami, FL)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>自定义Logo URL (可选)</label>
-                        <input type="text" id="customLogoUrl" placeholder="留空使用学校默认Logo">
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="console-section">
-            <div class="console-body" id="consoleBody">
-                <div class="console-line">
-                    <span class="console-time">[00:00:00]</span>
-                    <span class="console-content console-info">系统就绪,等待输入...</span>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="success-modal" id="successModal">
-        <div class="modal-overlay" onclick="document.getElementById('successModal').classList.remove('show')"></div>
-        <div class="success-modal-content">
-            <div class="success-icon">
-                <svg viewBox="0 0 24 24">
-                    <path fill="white" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-                </svg>
-            </div>
-            <div class="success-title">验证成功!</div>
-            <div class="success-message">您的学生身份已成功验证</div>
-            <div class="success-redirect-url" id="successRedirectUrl"></div>
-            <button class="verify-button" onclick="redirectToSuccess()">前往成功页面</button>
-        </div>
-    </div>
-    
-    <div class="captcha-modal" id="captchaModal">
-        <div class="captcha-modal-overlay" onclick="closeCaptchaModal()"></div>
-        <div class="captcha-modal-content">
-            <div class="captcha-title" id="captchaTitle">请完成人机验证</div>
-            <div class="captcha-status" id="captchaStatus"></div>
-            <div class="captcha-container">
-                <div id="hcaptcha-container"></div>
-                <div id="turnstile-container"></div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="modal" id="previewModal">
-        <div class="modal-overlay" onclick="closeModal()"></div>
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="modal-title">学生证预览</span>
-            </div>
-            <div class="modal-body">
-                <p style="color: #666; font-size: 14px; margin-bottom: 10px;">请确认学生证信息是否正确</p>
-                <canvas id="studentCard" class="modal-canvas"></canvas>
-            </div>
-            <div style="padding: 20px; display: flex; gap: 10px;">
-                <button class="verify-button" style="background: #666;" onclick="closeModal()">取消</button>
-                <button class="verify-button" onclick="confirmAndSubmit()">确认并提交</button>
-            </div>
-        </div>
-    </div>
+    <div class="header">
+        <div class="language-selector">
+            <button class="lang-btn active" onclick="setLanguage(event, 'zh-CN')">简体</button>
+            <button class="lang-btn" onclick="setLanguage(event, 'en')">English</button>
+        </div>
+        <h1><span>SheerID 验证器</span></h1>
+    </div>
+    
+    <div class="main-container">
+        <div class="input-section">
+            <div class="url-input-container">
+                <input type="text" 
+                       id="urlInput" 
+                       class="url-input" 
+                       placeholder="https://services.sheerid.com/verify/67c8c14f5f17a83b745e3f82/?verificationId=689c96eexxxxxxxx"
+                       autocomplete="off">
+            </div>
+            
+            <button class="verify-button" id="verifyButton" onclick="startVerification()">
+                <span>开始验证</span>
+            </button>
+            
+            <div class="advanced-toggle">
+                <button class="toggle-button" onclick="toggleAdvanced()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                    <span>高级设置</span>
+                </button>
+            </div>
+            
+            <div class="advanced-settings" id="advancedSettings">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>名字</label>
+                        <input type="text" id="firstName">
+                    </div>
+                    <div class="form-group">
+                        <label>姓氏</label>
+                        <input type="text" id="lastName">
+                    </div>
+                    <div class="form-group">
+                        <label>邮箱</label>
+                        <input type="email" id="email">
+                    </div>
+                    <div class="form-group">
+                        <label>生日</label>
+                        <input type="date" id="birthDate">
+                    </div>
+                    <div class="form-group">
+                        <label>学校</label>
+                        <select id="schoolId" onchange="updateEmailDomain()">
+                            <option value="651392">Miami Media School (Miami, FL)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>自定义Logo URL (可选)</label>
+                        <input type="text" id="customLogoUrl" placeholder="留空使用学校默认Logo">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="console-section">
+            <div class="console-body" id="consoleBody">
+                <div class="console-line">
+                    <span class="console-time">[00:00:00]</span>
+                    <span class="console-content console-info">系统就绪,等待输入...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="success-modal" id="successModal">
+        <div class="modal-overlay" onclick="document.getElementById('successModal').classList.remove('show')"></div>
+        <div class="success-modal-content">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24">
+                    <path fill="white" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                </svg>
+            </div>
+            <div class="success-title">验证成功!</div>
+            <div class="success-message">您的学生身份已成功验证</div>
+            <div class="success-redirect-url" id="successRedirectUrl"></div>
+            <button class="verify-button" onclick="redirectToSuccess()">前往成功页面</button>
+        </div>
+    </div>
+    
+    <div class="captcha-modal" id="captchaModal">
+        <div class="captcha-modal-overlay" onclick="closeCaptchaModal()"></div>
+        <div class="captcha-modal-content">
+            <div class="captcha-title" id="captchaTitle">请完成人机验证</div>
+            <div class="captcha-status" id="captchaStatus"></div>
+            <div class="captcha-container">
+                <div id="hcaptcha-container"></div>
+                <div id="turnstile-container"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="previewModal">
+        <div class="modal-overlay" onclick="closeModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">学生证预览</span>
+            </div>
+            <div class="modal-body">
+                <p style="color: #666; font-size: 14px; margin-bottom: 10px;">请确认学生证信息是否正确</p>
+                <canvas id="studentCard" class="modal-canvas"></canvas>
+            </div>
+            <div style="padding: 20px; display: flex; gap: 10px;">
+                <button class="verify-button" style="background: #666;" onclick="closeModal()">取消</button>
+                <button class="verify-button" onclick="confirmAndSubmit()">确认并提交</button>
+            </div>
+        </div>
+    </div>
 
-    <script>
-        const schools = {
-            '651392': {
-                name: 'Miami Media School (Miami, FL)',
-                idExtended: '651392',
-                domain: 'beonair.com',
-                logo: 'assets/651392.png'
-            },
-        };
-        
-        let currentVerificationId = '';
-        let logs = [];
-        let captchaTokens = { hcaptcha: null, turnstile: null };
-        let captchaResolve = null;
-        let captchaReject = null;
-        let currentRedirectUrl = '';
-        
-        function log(message, type = 'log') {
-            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
-            logs.push({ time, message, type });
-            
-            const consoleBody = document.getElementById('consoleBody');
-            const line = document.createElement('div');
-            line.className = 'console-line';
-            line.innerHTML = `
-                <span class="console-time">[${time}]</span>
-                <span class="console-content console-${type}">${escapeHtml(message)}</span>
-            `;
-            consoleBody.appendChild(line);
-            consoleBody.scrollTop = consoleBody.scrollHeight;
-        }
-        
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-        
-        function setLanguage(e, lang) {
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            if (e && e.target) e.target.classList.add('active');
-        }
-        
-        function toggleAdvanced() {
-            const settings = document.getElementById('advancedSettings');
-            const button = document.querySelector('.toggle-button');
-            settings.classList.toggle('show');
-            button.classList.toggle('active');
-        }
+    <script>
+        const schools = {
+            '651392': {
+                name: 'Miami Media School (Miami, FL)',
+                idExtended: '651392',
+                domain: 'Miami.edu',
+                logo: 'assets/651392.png'
+            },
+        };
+        
+        let currentVerificationId = '';
+        let logs = [];
+        let captchaTokens = { hcaptcha: null, turnstile: null };
+        let captchaResolve = null;
+        let captchaReject = null;
+        let currentRedirectUrl = '';
+        
+        function log(message, type = 'log') {
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            logs.push({ time, message, type });
+            
+            const consoleBody = document.getElementById('consoleBody');
+            const line = document.createElement('div');
+            line.className = 'console-line';
+            line.innerHTML = `
+                <span class="console-time">[${time}]</span>
+                <span class="console-content console-${type}">${escapeHtml(message)}</span>
+            `;
+            consoleBody.appendChild(line);
+            consoleBody.scrollTop = consoleBody.scrollHeight;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function setLanguage(e, lang) {
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            if (e && e.target) e.target.classList.add('active');
+        }
+        
+        function toggleAdvanced() {
+            const settings = document.getElementById('advancedSettings');
+            const button = document.querySelector('.toggle-button');
+            settings.classList.toggle('show');
+            button.classList.toggle('active');
+        }
 
-        // 改进的名字生成器 - 使用真实的英文名字组合
-        const nameGenerator = {
-            firstNames: ['James', 'John', 'Robert', 'Michael', 'William', 'David', 'Richard', 'Joseph', 'Thomas', 'Charles',
-                         'Mary', 'Patricia', 'Jennifer', 'Linda', 'Elizabeth', 'Barbara', 'Susan', 'Jessica', 'Sarah', 'Karen',
-                         'Daniel', 'Matthew', 'Anthony', 'Mark', 'Donald', 'Steven', 'Paul', 'Andrew', 'Joshua', 'Kenneth'],
-            lastNames: ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez',
-                       'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin',
-                       'Lee', 'White', 'Harris', 'Clark', 'Lewis', 'Robinson', 'Walker', 'Young', 'Allen', 'King'],
-            
-            getRandomElement(arr) {
-                return arr[Math.floor(Math.random() * arr.length)];
-            },
-            
-            generate() {
-                const firstName = this.getRandomElement(this.firstNames);
-                const lastName = this.getRandomElement(this.lastNames);
-                return {
-                    firstName,
-                    lastName,
-                    fullName: `${firstName} ${lastName}`
-                };
-            }
-        };
-        
-        function generateEmail() {
-            const schoolId = document.getElementById('schoolId').value;
-            const school = schools[schoolId];
-            const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-            let username = '';
-            for (let i = 0; i < 8; i++) {
-                username += chars[Math.floor(Math.random() * chars.length)];
-            }
-            return `${username}@${school.domain}`;
-        }
-        
-        // 修复: 生成与学生证一致的生日 (使用固定日期)
-        function generateBirthDate() {
-            return '2005-03-15'; // 使用固定生日以匹配学生证
-        }
-        
-        function updateEmailDomain() {
-            const schoolId = document.getElementById('schoolId').value;
-            const currentEmail = document.getElementById('email').value;
-            
-            if (currentEmail && currentEmail.includes('@')) {
-                const username = currentEmail.split('@')[0];
-                const newDomain = schools[schoolId].domain;
-                document.getElementById('email').value = `${username}@${newDomain}`;
-            } else if (!currentEmail) {
-                document.getElementById('email').value = generateEmail();
-            }
-        }
-        
-        function initializeDefaults() {
-            const name = nameGenerator.generate();
-            document.getElementById('firstName').value = name.firstName;
-            document.getElementById('lastName').value = name.lastName;
-            document.getElementById('email').value = generateEmail();
-            document.getElementById('birthDate').value = generateBirthDate();
-            
-            log(`初始化: ${name.firstName} ${name.lastName}`, 'debug');
-        }
-        
-        function parseUrl(url) {
-            try {
-                const match = url.match(/verificationId=([a-f0-9]+)/i);
-                if (match && match[1]) return match[1];
-                throw new Error('无效的验证ID格式');
-            } catch (error) {
-                log(error.message, 'error');
-                return null;
-            }
-        }
-        
-        function getLogoUrl() {
-            const customUrl = document.getElementById('customLogoUrl').value.trim();
-            if (customUrl) return customUrl;
-            
-            const schoolId = document.getElementById('schoolId').value;
-            return schools[schoolId].logo;
-        }
+        // 改进的名字生成器 - 使用真实的英文名字组合
+        const nameGenerator = {
+            firstNames: ['James', 'John', 'Robert', 'Michael', 'William', 'David', 'Richard', 'Joseph', 'Thomas', 'Charles',
+                         'Mary', 'Patricia', 'Jennifer', 'Linda', 'Elizabeth', 'Barbara', 'Susan', 'Jessica', 'Sarah', 'Karen',
+                         'Daniel', 'Matthew', 'Anthony', 'Mark', 'Donald', 'Steven', 'Paul', 'Andrew', 'Joshua', 'Kenneth'],
+            lastNames: ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez',
+                       'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin',
+                       'Lee', 'White', 'Harris', 'Clark', 'Lewis', 'Robinson', 'Walker', 'Young', 'Allen', 'King'],
+            
+            getRandomElement(arr) {
+                return arr[Math.floor(Math.random() * arr.length)];
+            },
+            
+            generate() {
+                const firstName = this.getRandomElement(this.firstNames);
+                const lastName = this.getRandomElement(this.lastNames);
+                return {
+                    firstName,
+                    lastName,
+                    fullName: `${firstName} ${lastName}`
+                };
+            }
+        };
+        
+        function generateEmail() {
+            const schoolId = document.getElementById('schoolId').value;
+            const school = schools[schoolId];
+            const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            let username = '';
+            for (let i = 0; i < 8; i++) {
+                username += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return `${username}@${school.domain}`;
+        }
+        
+        // 修复: 生成与学生证一致的生日 (使用固定日期)
+        function generateBirthDate() {
+            return '2004-03-15'; // 使用固定生日以匹配学生证
+        }
+        
+        function updateEmailDomain() {
+            const schoolId = document.getElementById('schoolId').value;
+            const currentEmail = document.getElementById('email').value;
+            
+            if (currentEmail && currentEmail.includes('@')) {
+                const username = currentEmail.split('@')[0];
+                const newDomain = schools[schoolId].domain;
+                document.getElementById('email').value = `${username}@${newDomain}`;
+            } else if (!currentEmail) {
+                document.getElementById('email').value = generateEmail();
+            }
+        }
+        
+        function initializeDefaults() {
+            const name = nameGenerator.generate();
+            document.getElementById('firstName').value = name.firstName;
+            document.getElementById('lastName').value = name.lastName;
+            document.getElementById('email').value = generateEmail();
+            document.getElementById('birthDate').value = generateBirthDate();
+            
+            log(`初始化: ${name.firstName} ${name.lastName}`, 'debug');
+        }
+        
+        function parseUrl(url) {
+            try {
+                const match = url.match(/verificationId=([a-f0-9]+)/i);
+                if (match && match[1]) return match[1];
+                throw new Error('无效的验证ID格式');
+            } catch (error) {
+                log(error.message, 'error');
+                return null;
+            }
+        }
+        
+        function getLogoUrl() {
+            const customUrl = document.getElementById('customLogoUrl').value.trim();
+            if (customUrl) return customUrl;
+            
+            const schoolId = document.getElementById('schoolId').value;
+            return schools[schoolId].logo;
+        }
 
-        // 修复: 确保学生证信息与表单完全一致
-        async function generateCard(firstName, lastName, schoolName) {
-            log('正在生成学生证...', 'info');
-            
-            const canvas = document.getElementById('studentCard');
-            const ctx = canvas.getContext('2d');
-            
-            canvas.width = 856;
-            canvas.height = 540;
-            
-            // 背景
-            ctx.fillStyle = '#F0F2F5';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            const headerHeight = 120;
-            ctx.fillStyle = '#D9232D';
-            ctx.fillRect(0, 0, canvas.width, headerHeight);
-            
-            const bodyY = headerHeight;
-            const bodyHeight = 350;
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, bodyY, canvas.width, bodyHeight);
-            
-            const footerY = bodyY + bodyHeight;
-            
-            // Logo 和文本
-            let logo, photo;
-            
-            try {
-                const logoUrl = getLogoUrl();
-                // 修复: 使用更稳定的头像源
-                const randomAvatarId = Math.floor(Math.random() * 70) + 1;
-                const photoUrl = `https://ps.iaw.pp.ua/avatars/men/${randomAvatarId}.jpg`;
-                
-                const results = await Promise.allSettled([
-                    loadImage(logoUrl),
-                    loadImage(photoUrl)
-                ]);
-                
-                if (results[0].status === 'fulfilled') logo = results[0].value;
-                if (results[1].status === 'fulfilled') photo = results[1].value;
-                
-                let textX = 30;
-                const logoSize = 80;
-                const logoMargin = (headerHeight - logoSize) / 2;
-                const logoX = 30;
-                const logoY = logoMargin;
-                
-                if (logo) {
-                    textX = logoX + logoSize + 20;
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, Math.PI * 2);
-                    ctx.closePath();
-                    ctx.clip();
-                    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
-                    ctx.restore();
-                }
-                
-                let y = 50;
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 30px "Segoe UI", Arial, sans-serif';
-                ctx.textAlign = 'left';
-                ctx.fillText(schoolName, textX, y);
-                
-                ctx.font = '24px "Segoe UI", Arial, sans-serif';
-                ctx.fillText('STUDENT ID CARD', textX, y + 40);
-                
-                // 照片
-                const photoX = 40;
-                const photoY = bodyY + 30;
-                const photoRectSize = 220;
-                
-                if (photo) {
-                    ctx.save();
-                    roundRect(ctx, photoX, photoY, photoRectSize, photoRectSize, 15);
-                    ctx.clip();
-                    ctx.drawImage(photo, photoX, photoY, photoRectSize, photoRectSize);
-                    ctx.restore();
-                } else {
-                    ctx.fillStyle = '#E0E0E0';
-                    roundRect(ctx, photoX, photoY, photoRectSize, photoRectSize, 15);
-                }
-                
-                // 学生信息 - 修复: 使用表单中的真实数据
-                const infoX = photoX + photoRectSize + 40;
-                let infoY = bodyY + 60;
-                
-                const birthDate = document.getElementById('birthDate').value; // 获取表单生日
-                
-                drawInfoField(ctx, 'NAME', `${firstName} ${lastName}`, infoX, infoY);
-                infoY += 80;
-                
-                // 修复: 生成一致的学生ID (基于姓名)
-                const studentId = 'INT' + (firstName + lastName).split('').reduce((a,c) => a + c.charCodeAt(0), 0) % 9500 + 10952;
-                drawInfoField(ctx, 'STUDENT ID', studentId, infoX, infoY);
-                infoY += 80;
-                
-                drawInfoField(ctx, 'FACULTY', 'Faculty of Medicine', infoX, infoY);
-                
-                
-// 绘制签发日期（ISSUE）
-// 绘制签发日期（ISSUE / VALID） - 使用硬编码 2025-10-25
-const dateY = bodyY + bodyHeight + 40;
+        // 修复: 确保学生证信息与表单完全一致
+        async function generateCard(firstName, lastName, schoolName) {
+            log('正在生成学生证...', 'info');
+            
+            const canvas = document.getElementById('studentCard');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = 856;
+            canvas.height = 540;
+            
+            // 背景
+            ctx.fillStyle = '#F0F2F5';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const headerHeight = 120;
+            ctx.fillStyle = '#D9232D';
+            ctx.fillRect(0, 0, canvas.width, headerHeight);
+            
+            const bodyY = headerHeight;
+            const bodyHeight = 350;
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, bodyY, canvas.width, bodyHeight);
+            
+            const footerY = bodyY + bodyHeight;
+            
+            // Logo 和文本
+            let logo, photo;
+            
+            try {
+                const logoUrl = getLogoUrl();
+                // 修复: 使用更稳定的头像源
+                const randomAvatarId = Math.floor(Math.random() * 70) + 1;
+                const photoUrl = `https://ps.iaw.pp.ua/avatars/men/${randomAvatarId}.jpg`;
+                
+                const results = await Promise.allSettled([
+                    loadImage(logoUrl),
+                    loadImage(photoUrl)
+                ]);
+                
+                if (results[0].status === 'fulfilled') logo = results[0].value;
+                if (results[1].status === 'fulfilled') photo = results[1].value;
+                
+                let textX = 30;
+                const logoSize = 80;
+                const logoMargin = (headerHeight - logoSize) / 2;
+                const logoX = 30;
+                const logoY = logoMargin;
+                
+                if (logo) {
+                    textX = logoX + logoSize + 20;
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, Math.PI * 2);
+                    ctx.closePath();
+                    ctx.clip();
+                    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+                    ctx.restore();
+                }
+                
+                let y = 50;
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 30px "Segoe UI", Arial, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(schoolName, textX, y);
+                
+                ctx.font = '24px "Segoe UI", Arial, sans-serif';
+                ctx.fillText('STUDENT ID CARD', textX, y + 40);
+                
+                // 照片
+                const photoX = 40;
+                const photoY = bodyY + 30;
+                const photoRectSize = 220;
+                
+                if (photo) {
+                    ctx.save();
+                    roundRect(ctx, photoX, photoY, photoRectSize, photoRectSize, 15);
+                    ctx.clip();
+                    ctx.drawImage(photo, photoX, photoY, photoRectSize, photoRectSize);
+                    ctx.restore();
+                } else {
+                    ctx.fillStyle = '#E0E0E0';
+                    roundRect(ctx, photoX, photoY, photoRectSize, photoRectSize, 15);
+                }
+                
+                // 学生信息 - 修复: 使用表单中的真实数据
+                const infoX = photoX + photoRectSize + 40;
+                let infoY = bodyY + 60;
+                
+                const birthDate = document.getElementById('birthDate').value; // 获取表单生日
+                
+                drawInfoField(ctx, 'NAME', `${firstName} ${lastName}`, infoX, infoY);
+                infoY += 80;
+                
+                // 修复: 生成一致的学生ID (基于姓名)
+                const studentId = 'INT' + (firstName + lastName).split('').reduce((a,c) => a + c.charCodeAt(0), 0) % 900000 + 100000;
+                drawInfoField(ctx, 'STUDENT ID', studentId, infoX, infoY);
+                infoY += 80;
+                
+                drawInfoField(ctx, 'FACULTY', 'Faculty of Medicine', infoX, infoY);
+                
+// 页脚 - 修复: 使用硬编码的签发日期
+const dateY = footerY + 30;
 
+// 硬编码签发日期
+const issueDateStr = '2024-10-20';
+
+// 绘制签发日期
 ctx.fillStyle = '#555';
 ctx.font = '24px "Segoe UI", Arial, sans-serif';
 ctx.textAlign = 'left';
-ctx.fillText('ISSUE', 30, dateY);
-
+ctx.fillText('ISSUE', 40, dateY);
 ctx.fillStyle = 'black';
 ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
-const issueDate = '2025-10-25';
-ctx.fillText(issueDate, 30, dateY + 25);
+ctx.fillText(issueDateStr, 40, dateY + 35);
 
-// 有效期 (4 年后)
-const validUntil = new Date(issueDate);
-validUntil.setFullYear(validUntil.getFullYear() + 4);
-const validStr = validUntil.toISOString().split('T')[0];
+// 计算有效期 (4年后)
+const issueDate = new Date(issueDateStr);
+const validDate = new Date(issueDate);
+validDate.setFullYear(validDate.getFullYear() + 4);
+const validDateStr = validDate.toISOString().split('T')[0];
 
+// 绘制有效期
 ctx.fillStyle = '#555';
 ctx.font = '24px "Segoe UI", Arial, sans-serif';
 ctx.textAlign = 'right';
-ctx.fillText('VALID', canvas.width - 30, dateY);
-
+ctx.fillText('VALID', canvas.width - 40, dateY);
 ctx.fillStyle = 'black';
 ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
-ctx.fillText(validStr, canvas.width - 30, dateY + 25);
+ctx.fillText(validDateStr, canvas.width - 40, dateY + 35);
 
+                
+                log('学生证生成成功', 'success');
+                
+            } catch (error) {
+                log(`生成学生证时出错: ${error.message}`, 'error');
+            }
+        }
 
-                
-                log('学生证生成成功', 'success');
-                
-            } catch (error) {
-                log(`生成学生证时出错: ${error.message}`, 'error');
-            }
-        }
+        function drawInfoField(ctx, label, value, x, y) {
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#888';
+            ctx.font = '24px "Segoe UI", Arial, sans-serif';
+            ctx.fillText(label, x, y);
+            
+            ctx.fillStyle = 'black';
+            ctx.font = 'bold 30px "Segoe UI", Arial, sans-serif';
+            ctx.fillText(value, x, y + 35);
+        }
 
-        function drawInfoField(ctx, label, value, x, y) {
-            ctx.textAlign = 'left';
-            ctx.fillStyle = '#888';
-            ctx.font = '24px "Segoe UI", Arial, sans-serif';
-            ctx.fillText(label, x, y);
-            
-            ctx.fillStyle = 'black';
-            ctx.font = 'bold 30px "Segoe UI", Arial, sans-serif';
-            ctx.fillText(value, x, y + 35);
-        }
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            ctx.fill();
+        }
 
-        function roundRect(ctx, x, y, width, height, radius) {
-            ctx.beginPath();
-            ctx.moveTo(x + radius, y);
-            ctx.lineTo(x + width - radius, y);
-            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-            ctx.lineTo(x + width, y + height - radius);
-            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-            ctx.lineTo(x + radius, y + height);
-            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-            ctx.lineTo(x, y + radius);
-            ctx.quadraticCurveTo(x, y, x + radius, y);
-            ctx.closePath();
-            ctx.fill();
-        }
+        function loadImage(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error(`Failed to load: ${src}`));
+                img.src = src;
+            });
+        }
+        
+        function showCaptchaModal() {
+            return new Promise((resolve, reject) => {
+                captchaResolve = resolve;
+                captchaReject = reject;
+                
+                const needsHcaptcha = window.CONFIG.hcaptcha.sitekey;
+                const needsTurnstile = window.CONFIG.turnstile.sitekey;
+                
+                if (!needsHcaptcha && !needsTurnstile) {
+                    log('未配置验证码,跳过验证', 'debug');
+                    resolve({ hcaptcha: null, turnstile: null });
+                    return;
+                }
 
-        function loadImage(src) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.crossOrigin = 'anonymous';
-                img.onload = () => resolve(img);
-                img.onerror = () => reject(new Error(`Failed to load: ${src}`));
-                img.src = src;
-            });
-        }
-        
-        function showCaptchaModal() {
-            return new Promise((resolve, reject) => {
-                captchaResolve = resolve;
-                captchaReject = reject;
-                
-                const needsHcaptcha = window.CONFIG.hcaptcha.sitekey;
-                const needsTurnstile = window.CONFIG.turnstile.sitekey;
-                
-                if (!needsHcaptcha && !needsTurnstile) {
-                    log('未配置验证码,跳过验证', 'debug');
-                    resolve({ hcaptcha: null, turnstile: null });
-                    return;
-                }
+                if (needsHcaptcha && !window.hcaptcha) {
+                    const script = document.createElement('script');
+                    script.src = 'https://js.hcaptcha.com/1/api.js';
+                    script.async = true;
+                    script.defer = true;
+                    document.head.appendChild(script);
+                }
+                if (needsTurnstile && !window.turnstile) {
+                    const script = document.createElement('script');
+                    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+                    script.async = true;
+                    script.defer = true;
+                    document.head.appendChild(script);
+                }
+                
+                captchaTokens = { hcaptcha: null, turnstile: null };
+                document.getElementById('captchaModal').classList.add('show');
+                document.getElementById('hcaptcha-container').innerHTML = '';
+                document.getElementById('turnstile-container').innerHTML = '';
+                
+                updateCaptchaStatus('正在加载验证码...');
+                
+                if (needsHcaptcha) {
+                    const checkHcaptchaLoaded = setInterval(() => {
+                        if (window.hcaptcha) {
+                            clearInterval(checkHcaptchaLoaded);
+                            renderHcaptcha();
+                        }
+                    }, 100);
+                } else {
+                    loadTurnstile();
+                }
+            });
+        }
 
-                if (needsHcaptcha && !window.hcaptcha) {
-                    const script = document.createElement('script');
-                    script.src = 'https://js.hcaptcha.com/1/api.js';
-                    script.async = true;
-                    script.defer = true;
-                    document.head.appendChild(script);
-                }
-                if (needsTurnstile && !window.turnstile) {
-                    const script = document.createElement('script');
-                    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
-                    script.async = true;
-                    script.defer = true;
-                    document.head.appendChild(script);
-                }
-                
-                captchaTokens = { hcaptcha: null, turnstile: null };
-                document.getElementById('captchaModal').classList.add('show');
-                document.getElementById('hcaptcha-container').innerHTML = '';
-                document.getElementById('turnstile-container').innerHTML = '';
-                
-                updateCaptchaStatus('正在加载验证码...');
-                
-                if (needsHcaptcha) {
-                    const checkHcaptchaLoaded = setInterval(() => {
-                        if (window.hcaptcha) {
-                            clearInterval(checkHcaptchaLoaded);
-                            renderHcaptcha();
-                        }
-                    }, 100);
-                } else {
-                    loadTurnstile();
-                }
-            });
-        }
+        function renderHcaptcha() {
+            log('正在加载 hCaptcha...', 'info');
+            updateCaptchaTitle('请完成第一步验证 (hCaptcha)');
+            updateCaptchaStatus('');
+            
+            document.getElementById('hcaptcha-container').style.display = 'block';
+            document.getElementById('turnstile-container').style.display = 'none';
+            
+            try {
+                hcaptcha.render('hcaptcha-container', {
+                    sitekey: window.CONFIG.hcaptcha.sitekey,
+                    callback: (token) => {
+                        captchaTokens.hcaptcha = token;
+                        log('hCaptcha 验证成功', 'success');
+                        onHcaptchaComplete();
+                    },
+                    'error-callback': () => {
+                        log('hCaptcha 验证失败', 'error');
+                        if (captchaReject) captchaReject(new Error('hCaptcha verification failed'));
+                        closeCaptchaModal();
+                    }
+                });
+            } catch (error) {
+                log(`hCaptcha 渲染失败: ${error.message}`, 'error');
+                if (captchaReject) captchaReject(error);
+                closeCaptchaModal();
+            }
+        }
+        
+        function onHcaptchaComplete() {
+            const needsTurnstile = window.CONFIG.turnstile.sitekey;
+            
+            if (needsTurnstile) {
+                log('hCaptcha 完成,正在加载 Turnstile...', 'info');
+                loadTurnstile();
+            } else {
+                completeCaptchaVerification();
+            }
+        }
+        
+        function loadTurnstile() {
+            if (!window.CONFIG.turnstile.sitekey) {
+                completeCaptchaVerification();
+                return;
+            }
+            
+            log('正在加载 Turnstile...', 'info');
+            updateCaptchaTitle('请完成第二步验证 (Turnstile)');
+            updateCaptchaStatus('');
+            
+            document.getElementById('turnstile-container').style.display = 'block';
 
-        function renderHcaptcha() {
-            log('正在加载 hCaptcha...', 'info');
-            updateCaptchaTitle('请完成第一步验证 (hCaptcha)');
-            updateCaptchaStatus('');
-            
-            document.getElementById('hcaptcha-container').style.display = 'block';
-            document.getElementById('turnstile-container').style.display = 'none';
-            
-            try {
-                hcaptcha.render('hcaptcha-container', {
-                    sitekey: window.CONFIG.hcaptcha.sitekey,
-                    callback: (token) => {
-                        captchaTokens.hcaptcha = token;
-                        log('hCaptcha 验证成功', 'success');
-                        onHcaptchaComplete();
-                    },
-                    'error-callback': () => {
-                        log('hCaptcha 验证失败', 'error');
-                        if (captchaReject) captchaReject(new Error('hCaptcha verification failed'));
-                        closeCaptchaModal();
-                    }
-                });
-            } catch (error) {
-                log(`hCaptcha 渲染失败: ${error.message}`, 'error');
-                if (captchaReject) captchaReject(error);
-                closeCaptchaModal();
-            }
-        }
-        
-        function onHcaptchaComplete() {
-            const needsTurnstile = window.CONFIG.turnstile.sitekey;
-            
-            if (needsTurnstile) {
-                log('hCaptcha 完成,正在加载 Turnstile...', 'info');
-                loadTurnstile();
-            } else {
-                completeCaptchaVerification();
-            }
-        }
-        
-        function loadTurnstile() {
-            if (!window.CONFIG.turnstile.sitekey) {
-                completeCaptchaVerification();
-                return;
-            }
-            
-            log('正在加载 Turnstile...', 'info');
-            updateCaptchaTitle('请完成第二步验证 (Turnstile)');
-            updateCaptchaStatus('');
-            
-            document.getElementById('turnstile-container').style.display = 'block';
+            const checkTurnstileLoaded = setInterval(() => {
+                if (window.turnstile) {
+                    clearInterval(checkTurnstileLoaded);
+                    try {
+                        turnstile.render('#turnstile-container', {
+                            sitekey: window.CONFIG.turnstile.sitekey,
+                            callback: (token) => {
+                                captchaTokens.turnstile = token;
+                                log('Turnstile 验证成功', 'success');
+                                completeCaptchaVerification();
+                            },
+                            'error-callback': () => {
+                                log('Turnstile 验证失败', 'error');
+                                if (captchaReject) captchaReject(new Error('Turnstile verification failed'));
+                                closeCaptchaModal();
+                            }
+                        });
+                    } catch (error) {
+                        log(`Turnstile 渲染失败: ${error.message}`, 'error');
+                        if (captchaReject) captchaReject(error);
+                        closeCaptchaModal();
+                    }
+                }
+            }, 100);
+        }
+        
+        function completeCaptchaVerification() {
+            log('所有验证码验证成功', 'success');
+            updateCaptchaStatus('验证完成!');
+            
+            setTimeout(() => {
+                document.getElementById('captchaModal').classList.remove('show');
+                if (captchaResolve) {
+                    captchaResolve(captchaTokens);
+                }
+            }, 500);
+        }
+        
+        function updateCaptchaTitle(text) {
+            document.getElementById('captchaTitle').textContent = text;
+        }
+        
+        function updateCaptchaStatus(text) {
+            document.getElementById('captchaStatus').textContent = text;
+        }
+        
+        function closeCaptchaModal() {
+            document.getElementById('captchaModal').classList.remove('show');
+            captchaTokens = { hcaptcha: null, turnstile: null };
+            if (captchaReject) captchaReject(new Error("用户关闭验证码窗口"));
+            captchaResolve = null;
+            captchaReject = null;
+        }
+        
+        function showModal() {
+            document.getElementById('previewModal').classList.add('show');
+        }
+        
+        function closeModal() {
+            document.getElementById('previewModal').classList.remove('show');
+        }
+        
+        function showSuccessModal(redirectUrl) {
+            currentRedirectUrl = redirectUrl;
+            document.getElementById('successRedirectUrl').textContent = redirectUrl;
+            document.getElementById('successModal').classList.add('show');
+        }
+        
+        function redirectToSuccess() {
+            if (currentRedirectUrl) {
+                window.open(currentRedirectUrl, '_blank');
+            }
+            document.getElementById('successModal').classList.remove('show');
+        }
+        
+        async function startVerification() {
+            const urlInput = document.getElementById('urlInput').value.trim();
+            
+            if (!urlInput) {
+                log('请输入验证URL', 'error');
+                return;
+            }
+            
+            const verificationId = parseUrl(urlInput);
+            if (!verificationId) return;
+            
+            currentVerificationId = verificationId;
+            log(`提取到验证ID: ${verificationId}`, 'success');
+            
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const schoolId = document.getElementById('schoolId').value;
+            const school = schools[schoolId];
 
-            const checkTurnstileLoaded = setInterval(() => {
-                if (window.turnstile) {
-                    clearInterval(checkTurnstileLoaded);
-                    try {
-                        turnstile.render('#turnstile-container', {
-                            sitekey: window.CONFIG.turnstile.sitekey,
-                            callback: (token) => {
-                                captchaTokens.turnstile = token;
-                                log('Turnstile 验证成功', 'success');
-                                completeCaptchaVerification();
-                            },
-                            'error-callback': () => {
-                                log('Turnstile 验证失败', 'error');
-                                if (captchaReject) captchaReject(new Error('Turnstile verification failed'));
-                                closeCaptchaModal();
-                            }
-                        });
-                    } catch (error) {
-                        log(`Turnstile 渲染失败: ${error.message}`, 'error');
-                        if (captchaReject) captchaReject(error);
-                        closeCaptchaModal();
-                    }
-                }
-            }, 100);
-        }
-        
-        function completeCaptchaVerification() {
-            log('所有验证码验证成功', 'success');
-            updateCaptchaStatus('验证完成!');
-            
-            setTimeout(() => {
-                document.getElementById('captchaModal').classList.remove('show');
-                if (captchaResolve) {
-                    captchaResolve(captchaTokens);
-                }
-            }, 500);
-        }
-        
-        function updateCaptchaTitle(text) {
-            document.getElementById('captchaTitle').textContent = text;
-        }
-        
-        function updateCaptchaStatus(text) {
-            document.getElementById('captchaStatus').textContent = text;
-        }
-        
-        function closeCaptchaModal() {
-            document.getElementById('captchaModal').classList.remove('show');
-            captchaTokens = { hcaptcha: null, turnstile: null };
-            if (captchaReject) captchaReject(new Error("用户关闭验证码窗口"));
-            captchaResolve = null;
-            captchaReject = null;
-        }
-        
-        function showModal() {
-            document.getElementById('previewModal').classList.add('show');
-        }
-        
-        function closeModal() {
-            document.getElementById('previewModal').classList.remove('show');
-        }
-        
-        function showSuccessModal(redirectUrl) {
-            currentRedirectUrl = redirectUrl;
-            document.getElementById('successRedirectUrl').textContent = redirectUrl;
-            document.getElementById('successModal').classList.add('show');
-        }
-        
-        function redirectToSuccess() {
-            if (currentRedirectUrl) {
-                window.open(currentRedirectUrl, '_blank');
-            }
-            document.getElementById('successModal').classList.remove('show');
-        }
-        
-        async function startVerification() {
-            const urlInput = document.getElementById('urlInput').value.trim();
-            
-            if (!urlInput) {
-                log('请输入验证URL', 'error');
-                return;
-            }
-            
-            const verificationId = parseUrl(urlInput);
-            if (!verificationId) return;
-            
-            currentVerificationId = verificationId;
-            log(`提取到验证ID: ${verificationId}`, 'success');
-            
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const schoolId = document.getElementById('schoolId').value;
-            const school = schools[schoolId];
+            if (!firstName || !lastName || !school) {
+                log('请确保所有必填项(姓名、学校)已填写', 'error');
+                return;
+            }
+            
+            log(`学生: ${firstName} ${lastName}`, 'info');
+            log(`学校: ${school.name}`, 'info');
 
-            if (!firstName || !lastName || !school) {
-                log('请确保所有必填项(姓名、学校)已填写', 'error');
-                return;
-            }
-            
-            log(`学生: ${firstName} ${lastName}`, 'info');
-            log(`学校: ${school.name}`, 'info');
-
-            await generateCard(firstName, lastName, school.name);
-            showModal();
-        }
-        
-        async function confirmAndSubmit() {
-            closeModal();
-            
-            try {
-                const tokens = await showCaptchaModal();
-                captchaTokens = tokens;
-                await submitVerification();
-            } catch (error) {
-                log(`流程中断或失败: ${error.message}`, 'error');
-                document.getElementById('verifyButton').disabled = false;
-                document.getElementById('verifyButton').innerHTML = '<span>开始验证</span>';
-            }
-        }
-        
-        async function submitVerification() {
-            const button = document.getElementById('verifyButton');
-            button.disabled = true;
-            button.innerHTML = '<span class="loading-spinner white"></span>验证中...';
-            
-            log('开始验证流程...', 'info');
-            
-            try {
-                const canvas = document.getElementById('studentCard');
-                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-                
-                if (blob.size > window.CONFIG.maxFileSize) {
-                    const sizeMB = (blob.size / (1024 * 1024)).toFixed(2);
-                    throw new Error(`文件大小 (${sizeMB}MB) 超过 1MB 限制`);
-                }
-                
-                const firstName = document.getElementById('firstName').value;
-                const lastName = document.getElementById('lastName').value;
-                
-                const formData = new FormData();
-                formData.append('verificationId', currentVerificationId);
-                formData.append('firstName', firstName);
-                formData.append('lastName', lastName);
-                formData.append('email', document.getElementById('email').value);
-                formData.append('birthDate', document.getElementById('birthDate').value);
-                formData.append('schoolId', document.getElementById('schoolId').value);
-                
-                // 修复: 使用与Worker一致的文件名
-                const filename = `International-ID-${firstName}-${lastName}-Front.png`;
-                formData.append('studentCard', blob, filename);
-                
-                if (captchaTokens.hcaptcha) {
-                    formData.append('hcaptchaToken', captchaTokens.hcaptcha);
-                }
-                if (captchaTokens.turnstile) {
-                    formData.append('turnstileToken', captchaTokens.turnstile);
-                }
-                
-                log('正在发送请求到服务器...', 'debug');
-                
-                const workerUrl = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:8787' 
-                    : window.CONFIG.workerUrl;
-                
-                const response = await fetch(`${workerUrl}/api/verify`, {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const result = await response.json();
-                
-                if (result.logs && result.logs.length > 0) {
-                    log('=== 服务器日志 ===', 'info');
-                    result.logs.forEach(logItem => {
-                        log(logItem.message, logItem.type || 'debug');
-                    });
-                    log('=== 服务器日志结束 ===', 'info');
-                }
-                
-                if (result.success) {
-                    const redirectUrl = result.redirectUrl || 'https://one.google.com/ai-student';
-                    log(`✅ 验证成功! 跳转URL: ${redirectUrl}`, 'success');
-                    showSuccessModal(redirectUrl);
-                } else {
-                    log(`❌ 验证失败: ${result.message || '未知错误'}`, 'error');
-                }
-                
-                captchaTokens = { hcaptcha: null, turnstile: null };
-                
-            } catch (error) {
-                log(`致命错误: ${error.message}`, 'error');
-                console.error(error);
-            } finally {
-                button.disabled = false;
-                button.innerHTML = '<span>开始验证</span>';
-            }
-        }
-        
-        window.onload = function() {
-            log('系统初始化完成', 'success');
-            
-            if (window.CONFIG.hcaptcha.sitekey) {
-                log('hCaptcha 已启用', 'info');
-            } else {
-                log('hCaptcha 未启用', 'debug');
-            }
-            
-            if (window.CONFIG.turnstile.sitekey) {
-                log('Turnstile 已启用', 'info');
-            } else {
-                log('Turnstile 未启用', 'debug');
-            }
-            
-            log('准备处理 SheerID 验证URL', 'info');
-            initializeDefaults();
-            
-            const urlInput = document.getElementById('urlInput');
-            urlInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') startVerification();
-            });
-        };
-    </script>
+            await generateCard(firstName, lastName, school.name);
+            showModal();
+        }
+        
+        async function confirmAndSubmit() {
+            closeModal();
+            
+            try {
+                const tokens = await showCaptchaModal();
+                captchaTokens = tokens;
+                await submitVerification();
+            } catch (error) {
+                log(`流程中断或失败: ${error.message}`, 'error');
+                document.getElementById('verifyButton').disabled = false;
+                document.getElementById('verifyButton').innerHTML = '<span>开始验证</span>';
+            }
+        }
+        
+        async function submitVerification() {
+            const button = document.getElementById('verifyButton');
+            button.disabled = true;
+            button.innerHTML = '<span class="loading-spinner white"></span>验证中...';
+            
+            log('开始验证流程...', 'info');
+            
+            try {
+                const canvas = document.getElementById('studentCard');
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                
+                if (blob.size > window.CONFIG.maxFileSize) {
+                    const sizeMB = (blob.size / (1024 * 1024)).toFixed(2);
+                    throw new Error(`文件大小 (${sizeMB}MB) 超过 1MB 限制`);
+                }
+                
+                const firstName = document.getElementById('firstName').value;
+                const lastName = document.getElementById('lastName').value;
+                
+                const formData = new FormData();
+                formData.append('verificationId', currentVerificationId);
+                formData.append('firstName', firstName);
+                formData.append('lastName', lastName);
+                formData.append('email', document.getElementById('email').value);
+                formData.append('birthDate', document.getElementById('birthDate').value);
+                formData.append('schoolId', document.getElementById('schoolId').value);
+                
+                // 修复: 使用与Worker一致的文件名
+                const filename = `International-ID-${firstName}-${lastName}-Front.png`;
+                formData.append('studentCard', blob, filename);
+                
+                if (captchaTokens.hcaptcha) {
+                    formData.append('hcaptchaToken', captchaTokens.hcaptcha);
+                }
+                if (captchaTokens.turnstile) {
+                    formData.append('turnstileToken', captchaTokens.turnstile);
+                }
+                
+                log('正在发送请求到服务器...', 'debug');
+                
+                const workerUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:8787' 
+                    : window.CONFIG.workerUrl;
+                
+                const response = await fetch(`${workerUrl}/api/verify`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.logs && result.logs.length > 0) {
+                    log('=== 服务器日志 ===', 'info');
+                    result.logs.forEach(logItem => {
+                        log(logItem.message, logItem.type || 'debug');
+                    });
+                    log('=== 服务器日志结束 ===', 'info');
+                }
+                
+                if (result.success) {
+                    const redirectUrl = result.redirectUrl || 'https://one.google.com/ai-student';
+                    log(`✅ 验证成功! 跳转URL: ${redirectUrl}`, 'success');
+                    showSuccessModal(redirectUrl);
+                } else {
+                    log(`❌ 验证失败: ${result.message || '未知错误'}`, 'error');
+                }
+                
+                captchaTokens = { hcaptcha: null, turnstile: null };
+                
+            } catch (error) {
+                log(`致命错误: ${error.message}`, 'error');
+                console.error(error);
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '<span>开始验证</span>';
+            }
+        }
+        
+        window.onload = function() {
+            log('系统初始化完成', 'success');
+            
+            if (window.CONFIG.hcaptcha.sitekey) {
+                log('hCaptcha 已启用', 'info');
+            } else {
+                log('hCaptcha 未启用', 'debug');
+            }
+            
+            if (window.CONFIG.turnstile.sitekey) {
+                log('Turnstile 已启用', 'info');
+            } else {
+                log('Turnstile 未启用', 'debug');
+            }
+            
+            log('准备处理 SheerID 验证URL', 'info');
+            initializeDefaults();
+            
+            const urlInput = document.getElementById('urlInput');
+            urlInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') startVerification();
+            });
+        };
+    </script>
 </body>
 </html>
