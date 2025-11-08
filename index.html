@@ -1001,7 +1001,7 @@ async function generateCard(firstName, lastName, schoolName) {
         infoY += 80;
         
         // STUDENT ID(统一硬编码值)
-        drawInfoField(ctx, 'Student id', 'INT5225957', infoX, infoY);
+        drawInfoField(ctx, 'STUDENT ID', 'INT522957', infoX, infoY);
         infoY += 80;
         
         // FACULTY (统一硬编码值)
@@ -1060,7 +1060,7 @@ async function generateCard(firstName, lastName, schoolName) {
         // 绘制学生信息
         drawInfoField(ctx, 'NAME', `${firstName} ${lastName}`, infoX, infoY);
         infoY += 80;
-        drawInfoField(ctx, 'Student id', 'INT522957', infoX, infoY);
+        drawInfoField(ctx, 'STUDENT ID', 'INT522957', infoX, infoY);
         infoY += 80;
         drawInfoField(ctx, 'FACULTY', 'Faculty of Medicine', infoX, infoY);
         
@@ -1406,7 +1406,7 @@ function loadImage(src) {
                 formData.append('email', document.getElementById('email').value);
                 formData.append('birthDate', document.getElementById('birthDate').value);
                 formData.append('schoolId', document.getElementById('schoolId').value);
-                formData.append('studentCard', blob, 'student_card.png');
+                formData.append('studentCard', blob, 'student_id_card.png');
                 
                 // 添加验证码token
                 if (captchaTokens.hcaptcha) {
