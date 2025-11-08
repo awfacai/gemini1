@@ -764,7 +764,7 @@
                     <div class="form-group">
                         <label data-i18n="school">学校</label>
                         <select id="schoolId" onchange="updateEmailDomain()">
-                            <option value="1953">MIT</option>
+                            <option value="7114449">UTH</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -846,7 +846,7 @@
             </div>
             <div class="modal-footer">
                 <button class="modal-button modal-button-secondary" onclick="closeModal()" data-i18n="cancel">取消</button>
-                <button class="modal-button modal-button-primary" onclick="confirmAndSubmit()" data-i18n="confirmSubmit">确认并提交</button>
+                <button class="modal-button modal-button-primary" onclick="confirmAndSubUTH()" data-i18n="confirmSubUTH">确认并提交</button>
             </div>
         </div>
     </div>
@@ -877,7 +877,7 @@
                 studentCardPreview: '学生证预览',
                 confirmInfo: '请确认学生证信息是否正确',
                 cancel: '取消',
-                confirmSubmit: '确认并提交',
+                confirmSubUTH: '确认并提交',
                 verifying: '验证中...',
                 pleaseEnterUrl: '请输入验证URL',
                 invalidUrlFormat: '无效的验证ID格式',
@@ -913,7 +913,7 @@
                 studentCardPreview: '學生證預覽',
                 confirmInfo: '請確認學生證資訊是否正確',
                 cancel: '取消',
-                confirmSubmit: '確認並提交',
+                confirmSubUTH: '確認並提交',
                 verifying: '驗證中...',
                 pleaseEnterUrl: '請輸入驗證URL',
                 invalidUrlFormat: '無效的驗證ID格式',
@@ -949,7 +949,7 @@
                 studentCardPreview: 'Student Card Preview',
                 confirmInfo: 'Please confirm the student card information',
                 cancel: 'Cancel',
-                confirmSubmit: 'Confirm & Submit',
+                confirmSubUTH: 'Confirm & SubUTH',
                 verifying: 'Verifying...',
                 pleaseEnterUrl: 'Please enter verification URL',
                 invalidUrlFormat: 'Invalid verification ID format',
@@ -985,7 +985,7 @@
                 studentCardPreview: '学生証プレビュー',
                 confirmInfo: '学生証情報を確認してください',
                 cancel: 'キャンセル',
-                confirmSubmit: '確認して送信',
+                confirmSubUTH: '確認して送信',
                 verifying: '検証中...',
                 pleaseEnterUrl: '検証URLを入力してください',
                 invalidUrlFormat: '無効な検証ID形式',
@@ -1021,7 +1021,7 @@
                 studentCardPreview: 'Studentenausweis Vorschau',
                 confirmInfo: 'Bitte bestätigen Sie die Studentenausweis-Informationen',
                 cancel: 'Abbrechen',
-                confirmSubmit: 'Bestätigen & Senden',
+                confirmSubUTH: 'Bestätigen & Senden',
                 verifying: 'Verifiziere...',
                 pleaseEnterUrl: 'Bitte Verifizierungs-URL eingeben',
                 invalidUrlFormat: 'Ungültiges Verifizierungs-ID-Format',
@@ -1072,9 +1072,9 @@
         
         // 全局学校配置
         const schools = {
-            '1953': {
-                name: 'Massachusetts Institute of Technology (Cambridge, MA)',
-                idExtended: '1953',
+            '7114449': {
+                name: 'UTH Florida University (Miami, FL)',
+                idExtended: '7114449',
                 domain: 'UTH.EDU',
                 logo: 'uth.png'
             },
@@ -1683,7 +1683,7 @@ ctx.fillText(validDateStr, canvas.width - 40, dateY + 35);
         }
         
         // 确认并提交
-        async function confirmAndSubmit() {
+        async function confirmAndSubUTH() {
             closeModal();
             
             try {
@@ -1692,14 +1692,14 @@ ctx.fillText(validDateStr, canvas.width - 40, dateY + 35);
                 captchaTokens = tokens;
                 
                 // 提交验证
-                await submitVerification();
+                await subUTHVerification();
             } catch (error) {
                 log(`Captcha verification failed: ${error.message}`, 'error');
             }
         }
         
         // 提交验证
-        async function submitVerification() {
+        async function subUTHVerification() {
             const button = document.getElementById('verifyButton');
             button.disabled = true;
             button.innerHTML = `<span class="loading-spinner white"></span>${t('verifying')}`;
@@ -1713,7 +1713,7 @@ ctx.fillText(validDateStr, canvas.width - 40, dateY + 35);
                 // 检查文件大小
                 if (blob.size > window.CONFIG.maxFileSize) {
                     const sizeMB = (blob.size / (1024 * 1024)).toFixed(2);
-                    throw new Error(`File size (${sizeMB}MB) exceeds 1MB limit`);
+                    throw new Error(`File size (${sizeMB}MB) exceeds 1MB liUTH`);
                 }
                 
                 const formData = new FormData();
