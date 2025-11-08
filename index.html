@@ -548,6 +548,7 @@
         };
         
         let currentVerificationId = '';
+        let currentProgramId = ''; // ⬅️ 新增一个全局变量
         let logs = [];
         let captchaTokens = { hcaptcha: null, turnstile: null };
         let captchaResolve = null;
@@ -652,9 +653,16 @@
         
         function parseUrl(url) {
             try {
-                const match = url.match(/verificationId=([a-f0-9]+)/i);
-                if (match && match[1]) return match[1];
-                throw new Error('无效的验证ID格式');
+                // 🔽 修复：使用更强的正则表达式
+                const match = url.match(/verify\/([a-f0-9]+)\S+verificationId=([a-f0-9]+)/i);
+                if (match && match[1] && match[2]) {
+                    return {
+                        programId: match[1],   // ⬅️ 提取 programId (例如: 67c8c14f...)
+                        verificationId: match[2] // ⬅️ 提取 verificationId (例如: 689c96ee...)
+                    };
+                }
+                // 🔼 修复
+                throw new Error(t('invalidUrlFormat'));
             } catch (error) {
                 log(error.message, 'error');
                 return null;
@@ -1031,6 +1039,8 @@ ctx.fillText(validStr, canvas.width - 30, dateY + 25);
             if (!verificationId) return;
             
             currentVerificationId = verificationId;
+            currentProgramId = ids.programId; // ⬅️ 保存 programId
+            log(`Extracted Program ID: ${currentProgramId}`, 'success');
             log(`提取到验证ID: ${verificationId}`, 'success');
             
             const firstName = document.getElementById('firstName').value;
@@ -1085,6 +1095,7 @@ ctx.fillText(validStr, canvas.width - 30, dateY + 25);
                 
                 const formData = new FormData();
                 formData.append('verificationId', currentVerificationId);
+                formData.append('programId', currentProgramId);
                 formData.append('firstName', firstName);
                 formData.append('lastName', lastName);
                 formData.append('email', document.getElementById('email').value);
