@@ -771,6 +771,9 @@
                 
                 
 // 绘制签发日期（ISSUE）
+// 绘制签发日期（ISSUE / VALID） - 使用硬编码 2025-10-25
+const dateY = bodyY + bodyHeight + 50;
+
 ctx.fillStyle = '#555';
 ctx.font = '24px "Segoe UI", Arial, sans-serif';
 ctx.textAlign = 'left';
@@ -778,18 +781,14 @@ ctx.fillText('ISSUE', 40, dateY);
 
 ctx.fillStyle = 'black';
 ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
+const issueDate = '2025-10-25';
+ctx.fillText(issueDate, 40, dateY + 35);
 
-// 使用硬编码日期 2025-10-25
-const birthDate = '2025-10-25';
-ctx.fillText(birthDate, 40, dateY + 35); // 使用硬编码日期
+// 有效期 (4 年后)
+const validUntil = new Date(issueDate);
+validUntil.setFullYear(validUntil.getFullYear() + 4);
+const validStr = validUntil.toISOString().split('T')[0];
 
-// 计算有效期（4年后）
-const issueDate = new Date(birthDate);
-const validDate = new Date(issueDate);
-validDate.setFullYear(validDate.getFullYear() + 4);
-const validDateStr = validDate.toISOString().split('T')[0];
-
-// 绘制有效期（VALID）
 ctx.fillStyle = '#555';
 ctx.font = '24px "Segoe UI", Arial, sans-serif';
 ctx.textAlign = 'right';
@@ -797,7 +796,8 @@ ctx.fillText('VALID', canvas.width - 40, dateY);
 
 ctx.fillStyle = 'black';
 ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
-ctx.fillText(validDateStr, canvas.width - 40, dateY + 35);
+ctx.fillText(validStr, canvas.width - 40, dateY + 35);
+
 
                 
                 log('学生证生成成功', 'success');
