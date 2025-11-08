@@ -5,16 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SheerID Verifier</title>
     <script>
-        // 配置（为空表示关闭该验证功能）
         window.CONFIG = {
             workerUrl: "https://gemini.irvv.workers.dev",
             hcaptcha: {
-                sitekey: "" // 留空关闭hCaptcha
+                sitekey: ""
             },
             turnstile: {
-                sitekey: "" // 留空关闭Turnstile
+                sitekey: ""
             },
-            maxFileSize: 1 * 1024 * 1024 // 1MB
+            maxFileSize: 1 * 1024 * 1024
         };
     </script>
     <style>
@@ -28,7 +27,7 @@
             font-family: 'Segoe UI', 'SF Pro Text', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: #450606;
             min-height: 100vh;
-            display: flex; /* 修复: 修复 display: ex; */
+            display: flex;
             flex-direction: column;
             color: #1a1a1a;
         }
@@ -116,10 +115,6 @@
             outline: none;
             border-color: #666;
             background: #fff;
-        }
-        
-        .url-input::placeholder {
-            color: #999;
         }
         
         .verify-button {
@@ -228,7 +223,6 @@
             background: #fff;
         }
         
-        /* 模态框样式 */
         .success-modal, .captcha-modal, .modal {
             display: none;
             position: fixed;
@@ -260,17 +254,16 @@
             position: relative;
             background: #fff;
             border-radius: 16px;
-            padding: 30px; /* 统一 padding */
+            padding: 30px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             animation: slideUp 0.3s;
             text-align: center;
-            max-width: 500px; /* 限制宽度 */
+            max-width: 500px;
             width: 90%;
             max-height: 90vh;
             overflow: auto;
         }
 
-        /* 成功模态框特定样式 */
         .success-modal-content {
              padding: 40px;
         }
@@ -304,7 +297,6 @@
             font-family: monospace;
         }
         
-        /* 验证码模态框特定样式 */
         .captcha-container {
             display: flex;
             justify-content: center;
@@ -312,7 +304,6 @@
             min-height: 78px;
         }
 
-        /* 预览模态框特定样式 */
         .modal-header {
             padding: 20px;
             border-bottom: 1px solid #e0e0e0;
@@ -333,30 +324,7 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             margin: 20px 0;
         }
-        
-        /* 动画 */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideUp {
-            from {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
 
-        @keyframes scaleIn {
-            from { transform: scale(0); }
-            to { transform: scale(1); }
-        }
-        
-        /* 控制台样式 */
         .console-section {
             background: #1a1a1a;
             border-radius: 12px;
@@ -375,7 +343,22 @@
             font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
             font-size: 13px;
             line-height: 1.6;
+            color: #fff;
         }
+        
+        .console-line {
+            margin: 4px 0;
+        }
+        
+        .console-time {
+            color: #666;
+        }
+        
+        .console-info { color: #5ac8fa; }
+        .console-success { color: #4cd964; }
+        .console-error { color: #ff3b30; }
+        .console-warning { color: #ff9500; }
+        .console-debug { color: #999; }
         
         .loading-spinner {
             display: inline-block;
@@ -398,7 +381,27 @@
             to { transform: rotate(360deg); }
         }
         
-        /* 响应式 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+        
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -420,12 +423,9 @@
     <div class="header">
         <div class="language-selector">
             <button class="lang-btn active" onclick="setLanguage(event, 'zh-CN')">简体</button>
-            <button class="lang-btn" onclick="setLanguage(event, 'zh-TW')">繁體</button>
             <button class="lang-btn" onclick="setLanguage(event, 'en')">English</button>
-            <button class="lang-btn" onclick="setLanguage(event, 'ja')">日本語</button>
-            <button class="lang-btn" onclick="setLanguage(event, 'de')">Deutsch</button>
         </div>
-        <h1><span data-i18n="title">SheerID 验证器</span></h1>
+        <h1><span>SheerID 验证器</span></h1>
     </div>
     
     <div class="main-container">
@@ -439,7 +439,7 @@
             </div>
             
             <button class="verify-button" id="verifyButton" onclick="startVerification()">
-                <span data-i18n="startVerify">开始验证</span>
+                <span>开始验证</span>
             </button>
             
             <div class="advanced-toggle">
@@ -447,89 +447,71 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
-                    <span data-i18n="advancedSettings">高级设置</span>
+                    <span>高级设置</span>
                 </button>
             </div>
             
             <div class="advanced-settings" id="advancedSettings">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label data-i18n="firstName">名字</label>
+                        <label>名字</label>
                         <input type="text" id="firstName">
                     </div>
                     <div class="form-group">
-                        <label data-i18n="lastName">姓氏</label>
+                        <label>姓氏</label>
                         <input type="text" id="lastName">
                     </div>
                     <div class="form-group">
-                        <label data-i18n="email">邮箱</label>
+                        <label>邮箱</label>
                         <input type="email" id="email">
                     </div>
                     <div class="form-group">
-                        <label data-i18n="birthDate">生日</label>
+                        <label>生日</label>
                         <input type="date" id="birthDate">
                     </div>
                     <div class="form-group">
-                        <label data-i18n="school">学校</label>
+                        <label>学校</label>
                         <select id="schoolId" onchange="updateEmailDomain()">
                             <option value="651392">Miami Media School (Miami, FL)</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label data-i18n="customLogoUrl">自定义Logo URL (可选)</label>
-                        <input type="text" id="customLogoUrl" placeholder="">
+                        <label>自定义Logo URL (可选)</label>
+                        <input type="text" id="customLogoUrl" placeholder="留空使用学校默认Logo">
                     </div>
                 </div>
             </div>
         </div>
         
         <div class="console-section">
-            <div class="console-header">
-                <div class="console-title">
-                    <span class="console-status"></span>
-                    <span data-i18n="console">控制台</span>
-                </div>
-                <div class="console-actions">
-                    <button class="console-btn" onclick="clearConsole()" data-i18n="clear">清除</button>
-                    <button class="console-btn" onclick="exportLogs()" data-i18n="export">导出</button>
-                </div>
-            </div>
             <div class="console-body" id="consoleBody">
                 <div class="console-line">
                     <span class="console-time">[00:00:00]</span>
-                    <span class="console-content console-info" data-i18n="systemReady">系统就绪，等待输入...</span>
+                    <span class="console-content console-info">系统就绪,等待输入...</span>
                 </div>
             </div>
-        </div>
-    </div>
-    
-    <div class="footer">
-        <div>2025 SheerID Verifier</div>
-        <div class="footer-links">
-            <a href="https://linux.do" target="_blank">LinuxDo</a>
-            <a href="#" onclick="showAbout(); return false;" data-i18n="about">关于</a>
         </div>
     </div>
     
     <div class="success-modal" id="successModal">
+        <div class="modal-overlay" onclick="document.getElementById('successModal').classList.remove('show')"></div>
         <div class="success-modal-content">
             <div class="success-icon">
                 <svg viewBox="0 0 24 24">
                     <path fill="white" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
                 </svg>
             </div>
-            <div class="success-title" data-i18n="successTitle">验证成功！</div>
-            <div class="success-message" data-i18n="successMessage">您的学生身份已成功验证</div>
+            <div class="success-title">验证成功!</div>
+            <div class="success-message">您的学生身份已成功验证</div>
             <div class="success-redirect-url" id="successRedirectUrl"></div>
-            <button class="success-button" onclick="redirectToSuccess()" data-i18n="goToSuccessPage">前往成功页面</button>
+            <button class="verify-button" onclick="redirectToSuccess()">前往成功页面</button>
         </div>
     </div>
     
     <div class="captcha-modal" id="captchaModal">
         <div class="captcha-modal-overlay" onclick="closeCaptchaModal()"></div>
         <div class="captcha-modal-content">
-            <button class="captcha-close" onclick="closeCaptchaModal()">×</button>
-            <div class="captcha-title" id="captchaTitle" data-i18n="completeCaptcha">请完成人机验证</div>
+            <div class="captcha-title" id="captchaTitle">请完成人机验证</div>
             <div class="captcha-status" id="captchaStatus"></div>
             <div class="captcha-container">
                 <div id="hcaptcha-container"></div>
@@ -542,85 +524,20 @@
         <div class="modal-overlay" onclick="closeModal()"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <span class="modal-title" data-i18n="studentCardPreview">学生证预览</span>
-                <button class="modal-close" onclick="closeModal()">×</button>
+                <span class="modal-title">学生证预览</span>
             </div>
             <div class="modal-body">
-                <p style="color: #666; font-size: 14px; margin-bottom: 10px;" data-i18n="confirmInfo">请确认学生证信息是否正确</p>
+                <p style="color: #666; font-size: 14px; margin-bottom: 10px;">请确认学生证信息是否正确</p>
                 <canvas id="studentCard" class="modal-canvas"></canvas>
             </div>
-            <div class="modal-footer">
-                <button class="modal-button modal-button-secondary" onclick="closeModal()" data-i18n="cancel">取消</button>
-                <button class="modal-button modal-button-primary" onclick="confirmAndSubmit()" data-i18n="confirmSubmit">确认并提交</button>
+            <div style="padding: 20px; display: flex; gap: 10px;">
+                <button class="verify-button" style="background: #666;" onclick="closeModal()">取消</button>
+                <button class="verify-button" onclick="confirmAndSubmit()">确认并提交</button>
             </div>
         </div>
     </div>
 
     <script>
-        // i18n 翻译配置
-        const translations = {
-            'zh-CN': {
-                title: 'SheerID 验证器', startVerify: '开始验证', advancedSettings: '高级设置', firstName: '名字', lastName: '姓氏', email: '邮箱', birthDate: '生日', school: '学校', customLogoUrl: '自定义Logo URL (可选)', customLogoPlaceholder: '留空使用学校默认Logo', console: '控制台', clear: '清除', export: '导出', systemReady: '系统就绪，等待输入...', about: '关于', successTitle: '验证成功！', successMessage: '您的学生身份已成功验证', goToSuccessPage: '前往成功页面', completeCaptcha: '请完成人机验证', studentCardPreview: '学生证预览', confirmInfo: '请确认学生证信息是否正确', cancel: '取消', confirmSubmit: '确认并提交', verifying: '验证中...', pleaseEnterUrl: '请输入验证URL', invalidUrlFormat: '无效的验证ID格式', captchaStep1: '请完成第一步验证 (hCaptcha)', captchaStep2: '请完成第二步验证 (Turnstile)', loadingCaptcha: '正在加载验证码...', captchaComplete: '验证完成！', generatingCard: '正在生成学生证...', cardGenerated: '学生证生成成功', verificationSuccess: '✅ 验证成功！跳转URL: ', verificationFailed: '❌ 验证失败: '
-            },
-            'zh-TW': {
-                title: 'SheerID 驗證器', startVerify: '開始驗證', advancedSettings: '進階設定', firstName: '名字', lastName: '姓氏', email: '電子郵件', birthDate: '生日', school: '學校', customLogoUrl: '自訂Logo URL (選填)', customLogoPlaceholder: '留空使用學校預設Logo', console: '控制台', clear: '清除', export: '匯出', systemReady: '系統就緒，等待輸入...', about: '關於', successTitle: '驗證成功！', successMessage: '您的學生身份已成功驗證', goToSuccessPage: '前往成功頁面', completeCaptcha: '請完成人機驗證', studentCardPreview: '學生證預覽', confirmInfo: '請確認學生證資訊是否正確', cancel: '取消', confirmSubmit: '確認並提交', verifying: '驗證中...', pleaseEnterUrl: '請輸入驗證URL', invalidUrlFormat: '無效的驗證ID格式', captchaStep1: '請完成第一步驗證 (hCaptcha)', captchaStep2: '請完成第二步驗證 (Turnstile)', loadingCaptcha: '正在載入驗證碼...', captchaComplete: '驗證完成！', generatingCard: '正在生成學生證...', cardGenerated: '學生證生成成功', verificationSuccess: '✅ 驗證成功！跳轉URL: ', verificationFailed: '❌ 驗證失敗: '
-            },
-            'en': {
-                title: 'SheerID Verifier', startVerify: 'Start Verification', advancedSettings: 'Advanced Settings', firstName: 'First Name', lastName: 'Last Name', email: 'Email', birthDate: 'Birth Date', school: 'School', customLogoUrl: 'Custom Logo URL (Optional)', customLogoPlaceholder: 'Leave blank to use school default logo', console: 'Console', clear: 'Clear', export: 'Export', systemReady: 'System ready. Waiting for input...', about: 'About', successTitle: 'Verification Successful!', successMessage: 'Your student status has been successfully verified', goToSuccessPage: 'Go to Success Page', completeCaptcha: 'Please complete the captcha', studentCardPreview: 'Student Card Preview', confirmInfo: 'Please confirm the student card information', cancel: 'Cancel', confirmSubmit: 'Confirm & Submit', verifying: 'Verifying...', pleaseEnterUrl: 'Please enter verification URL', invalidUrlFormat: 'Invalid verification ID format', captchaStep1: 'Please complete step 1 verification (hCaptcha)', captchaStep2: 'Please complete step 2 verification (Turnstile)', loadingCaptcha: 'Loading captcha...', captchaComplete: 'Verification complete!', generatingCard: 'Generating student card...', cardGenerated: 'Student card generated successfully', verificationSuccess: '✅ Verification successful! Redirect URL: ', verificationFailed: '❌ Verification failed: '
-            },
-            'ja': {
-                title: 'SheerID 検証ツール', startVerify: '検証を開始', advancedSettings: '詳細設定', firstName: '名', lastName: '姓', email: 'メール', birthDate: '生年月日', school: '学校', customLogoUrl: 'カスタムロゴURL (オプション)', customLogoPlaceholder: '空白の場合は学校のデフォルトロゴを使用', console: 'コンソール', clear: 'クリア', export: 'エクスポート', systemReady: 'システム準備完了。入力待機中...', about: '概要', successTitle: '検証成功！', successMessage: '学生ステータスが正常に検証されました', goToSuccessPage: '成功ページへ', completeCaptcha: 'キャプチャを完了してください', studentCardPreview: '学生証プレビュー', confirmInfo: '学生証情報を確認してください', cancel: 'キャンセル', confirmSubmit: '確認して送信', verifying: '検証中...', pleaseEnterUrl: '検証URLを入力してください', invalidUrlFormat: '無効な検証ID形式', captchaStep1: 'ステップ1の検証を完了してください (hCaptcha)', captchaStep2: 'ステップ2の検証を完了してください (Turnstile)', loadingCaptcha: 'キャプチャを読み込み中...', captchaComplete: '検証完了！', generatingCard: '学生証を生成中...', cardGenerated: '学生証が正常に生成されました', verificationSuccess: '✅ 検証成功！リダイレクトURL: ', verificationFailed: '❌ 検証失敗: '
-            },
-            'de': {
-                title: 'SheerID Verifizierer', startVerify: 'Verifizierung starten', advancedSettings: 'Erweiterte Einstellungen', firstName: 'Vorname', lastName: 'Nachname', email: 'E-Mail', birthDate: 'Geburtsdatum', school: 'Schule', customLogoUrl: 'Benutzerdefinierte Logo-URL (Optional)', customLogoPlaceholder: 'Leer lassen für Standard-Schullogo', console: 'Konsole', clear: 'Löschen', export: 'Exportieren', systemReady: 'System bereit. Warte auf Eingabe...', about: 'Über', successTitle: 'Verifizierung erfolgreich!', successMessage: 'Ihr Studentenstatus wurde erfolgreich verifiziert', goToSuccessPage: 'Zur Erfolgsseite', completeCaptcha: 'Bitte vervollständigen Sie das Captcha', studentCardPreview: 'Studentenausweis Vorschau', confirmInfo: 'Bitte bestätigen Sie die Studentenausweis-Informationen', cancel: 'Abbrechen', confirmSubmit: 'Bestätigen & Senden', verifying: 'Verifiziere...', pleaseEnterUrl: 'Bitte Verifizierungs-URL eingeben', invalidUrlFormat: 'Ungültiges Verifizierungs-ID-Format', captchaStep1: 'Bitte vervollständigen Sie Schritt 1 (hCaptcha)', captchaStep2: 'Bitte vervollständigen Sie Schritt 2 (Turnstile)', loadingCaptcha: 'Lade Captcha...', captchaComplete: 'Verifizierung abgeschlossen!', generatingCard: 'Erstelle Studentenausweis...', cardGenerated: 'Studentenausweis erfolgreich erstellt', verificationSuccess: '✅ Verifizierung erfolgreich! Weiterleitungs-URL: ', verificationFailed: '❌ Verifizierung fehlgeschlagen: '
-            }
-        };
-        
-        let currentLanguage = 'zh-CN';
-        let currentRedirectUrl = '';
-        
-        // 设置语言
-        // 修复: 接受 event 对象 e，并用它来确定点击的按钮
-        function setLanguage(e, lang) {
-            currentLanguage = lang;
-            document.documentElement.lang = lang;
-            
-            // 更新按钮状态
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            if (e && e.target) {
-                e.target.classList.add('active');
-            } else {
-                // 如果是从代码调用而不是点击，需要手动找到按钮
-                const targetBtn = document.querySelector(`.lang-btn[onclick*="'${lang}'"]`);
-                if (targetBtn) targetBtn.classList.add('active');
-            }
-            
-            // 更新所有带有data-i18n属性的元素
-            document.querySelectorAll('[data-i18n]').forEach(element => {
-                const key = element.getAttribute('data-i18n');
-                if (translations[lang] && translations[lang][key]) {
-                    element.textContent = translations[lang][key];
-                }
-            });
-            
-            // 更新placeholder
-            const customLogoInput = document.getElementById('customLogoUrl');
-            if (customLogoInput) {
-                customLogoInput.placeholder = translations[lang].customLogoPlaceholder || '';
-            }
-            
-            // 更新 h1 标题
-            document.querySelector('h1 span').textContent = t('title');
-
-            log(t('languageChanged', `Language changed to ${lang}`), 'info');
-        }
-        
-        // 获取翻译
-        function t(key, defaultValue = '') {
-            return translations[currentLanguage] ? (translations[currentLanguage][key] || defaultValue || key) : (defaultValue || key);
-        }
-        
-        // 全局学校配置
         const schools = {
             '651392': {
                 name: 'Miami Media School (Miami, FL)',
@@ -630,21 +547,16 @@
             },
         };
         
-        // 全局变量
         let currentVerificationId = '';
         let logs = [];
-        let captchaTokens = {
-            hcaptcha: null,
-            turnstile: null
-        };
+        let captchaTokens = { hcaptcha: null, turnstile: null };
         let captchaResolve = null;
         let captchaReject = null;
+        let currentRedirectUrl = '';
         
-        // 控制台日志函数
         function log(message, type = 'log') {
             const time = new Date().toLocaleTimeString('en-US', { hour12: false });
-            const logEntry = { time, message, type };
-            logs.push(logEntry);
+            logs.push({ time, message, type });
             
             const consoleBody = document.getElementById('consoleBody');
             const line = document.createElement('div');
@@ -663,127 +575,46 @@
             return div.innerHTML;
         }
         
-        function clearConsole() {
-            logs = [];
-            document.getElementById('consoleBody').innerHTML = '';
-            log('Console cleared', 'debug');
+        function setLanguage(e, lang) {
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            if (e && e.target) e.target.classList.add('active');
         }
         
-        function exportLogs() {
-            const logText = logs.map(l => `[${l.time}] [${l.type.toUpperCase()}] ${l.message}`).join('\n');
-            const blob = new Blob([logText], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `console_${Date.now()}.log`;
-            a.click();
-            URL.revokeObjectURL(url);
-            log('Logs exported', 'success');
-        }
-        
-        // 显示关于信息
-        function showAbout() {
-            alert('SheerID Verifier v1.0\n\nDeveloped for educational purposes\nVisit LinuxDo Forum for more information');
-        }
-        
-        // 切换高级设置
         function toggleAdvanced() {
             const settings = document.getElementById('advancedSettings');
             const button = document.querySelector('.toggle-button');
             settings.classList.toggle('show');
             button.classList.toggle('active');
         }
-        
-// 名字生成器 (已修复)
-const nameGenerator = {
-    // 词根
-    prefixes: ['Lcsr', 'Gvdr', 'Par', 'Wil', 'jl', 'Fyjr', 'Ros', 'Hvr', 'Vvdl', 'Ksc', 'Djyn', 'Bri', 'yjl', 'Sar', 'Jvds', 'Nor', 'Quin', 'Tvdr', 'Car', 'csr'],
-    middles: ['bfn', 'bf', 'ay', 'cs', 'sc', 'in', 'ol', 'er', 'kn', 'ian', 'acs', 'il', 'ey', 'scr', 'cs', 'im', 'al', 'om', 'oy', 'esc'],
-    suffixes: ['bzvd', 'stzvdn', 'fvzd', 'svzde', 'fzdvld', 'ldv', 'tdvn', 'wzdvd', 'rizdve', 'dzvdle', 'mvdn', 'wzdh', 'hzvdm', 'vdon', 'gard', 'bzvdg', 'lzvdd', 'shzvde', 'wzdk', 'zvdook'],
-    nameRoots: ['Odcv', 'Bzvdn', 'Jdvhn', 'Gzveg', 'Azdvx', 'Nick', 'Kzvdn', 'Wngl', 'Ddzvv', 'Rdich', 'Crzdvt', 'Step', 'Tbgnom', 'Henr', 'Psful', 'Leon', 'Frzdvd', 'Mizvdh', 'Igran', 'zvdw'],
-    nameEndings: ['aegl', 'ie', 'en', 'dvel', 'ab', 'y', 'in', 'evdy', 'odznr', 'advzl', 'dvi', 'innge', 'do', 'en', 'ercb', 'avdn', 'ar', 'iel', 'ondv', 'lyn'],
-    
-    // 词根类型到数组键的映射
-    partMap: {
-        prefix: 'prefixes',
-        middle: 'middles',
-        suffix: 'suffixes',
-        nameRoot: 'nameRoots',
-        ending: 'nameEndings'
-    },
 
-    patterns: {
-        firstName: [
-            ['prefix', 'ending'],
-            ['nameRoot', 'ending'],
-            ['prefix', 'middle', 'ending'],
-            ['nameRoot', 'middle', 'ending']
-        ],
-        lastName: [
-            ['prefix', 'suffix'],
-            ['nameRoot', 'suffix'],
-            ['prefix', 'middle', 'suffix'],
-            ['prefix', 'suffix'] // 修复: 将 'compound' 替换为明确的模式
-        ]
-    },
-    
-    // 辅助函数: 随机获取元素
-    getRandomElement(arr) {
-        return arr[Math.floor(Math.random() * arr.length)];
-    },
-
-    /**
-     * @description 根据模式生成名字组件
-     * @param {string} type - 'firstName' 或 'lastName' (未直接使用)
-     * @param {string[]} pattern - 具体的模式数组，例如 ['prefix', 'ending']
-     * @returns {string} 生成的名称片段
-     */
-    generateComponent(pattern) {
-        let component = '';
-        for (let partType of pattern) {
-            const listName = this.partMap[partType];
+        // 改进的名字生成器 - 使用真实的英文名字组合
+        const nameGenerator = {
+            firstNames: ['James', 'John', 'Robert', 'Michael', 'William', 'David', 'Richard', 'Joseph', 'Thomas', 'Charles',
+                         'Mary', 'Patricia', 'Jennifer', 'Linda', 'Elizabeth', 'Barbara', 'Susan', 'Jessica', 'Sarah', 'Karen',
+                         'Daniel', 'Matthew', 'Anthony', 'Mark', 'Donald', 'Steven', 'Paul', 'Andrew', 'Joshua', 'Kenneth'],
+            lastNames: ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez',
+                       'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin',
+                       'Lee', 'White', 'Harris', 'Clark', 'Lewis', 'Robinson', 'Walker', 'Young', 'Allen', 'King'],
             
-            // 修复: 检查 listName 是否存在且是否为数组
-            if (listName && Array.isArray(this[listName])) {
-                component += this.getRandomElement(this[listName]);
-            } else {
-                // Fallback for unexpected partType
-                component += '';
+            getRandomElement(arr) {
+                return arr[Math.floor(Math.random() * arr.length)];
+            },
+            
+            generate() {
+                const firstName = this.getRandomElement(this.firstNames);
+                const lastName = this.getRandomElement(this.lastNames);
+                return {
+                    firstName,
+                    lastName,
+                    fullName: `${firstName} ${lastName}`
+                };
             }
-        }
-        return component;
-    },
-    
-    formatName(name) {
-        // 改进: 避免将整个名字转为小写，只确保首字母大写
-        if (!name) return '';
-        return name.charAt(0).toUpperCase() + name.slice(1);
-    },
-    
-    generate() {
-        const firstNamePattern = this.getRandomElement(this.patterns.firstName);
-        const lastNamePattern = this.getRandomElement(this.patterns.lastName);
-        
-        // 修复: 调用 generateComponent 时只传递 pattern
-        const firstName = this.generateComponent(firstNamePattern);
-        const lastName = this.generateComponent(lastNamePattern);
-        
-        const formattedFirstName = this.formatName(firstName);
-        const formattedLastName = this.formatName(lastName);
-        
-        return {
-            firstName: formattedFirstName,
-            lastName: formattedLastName,
-            fullName: `${formattedFirstName} ${formattedLastName}`
         };
-    }
-};
         
-        // 生成随机邮箱
         function generateEmail() {
             const schoolId = document.getElementById('schoolId').value;
             const school = schools[schoolId];
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
             let username = '';
             for (let i = 0; i < 8; i++) {
                 username += chars[Math.floor(Math.random() * chars.length)];
@@ -791,15 +622,11 @@ const nameGenerator = {
             return `${username}@${school.domain}`;
         }
         
-        // 生成随机生日 (2001-2006)
+        // 修复: 生成与学生证一致的生日 (使用固定日期)
         function generateBirthDate() {
-            const year = 2001 + Math.floor(Math.random() * 6);
-            const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
-            const day = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0');
-            return `${year}-${month}-${day}`;
+            return '2002-03-15'; // 使用固定生日以匹配学生证
         }
         
-        // 更新邮箱域名
         function updateEmailDomain() {
             const schoolId = document.getElementById('schoolId').value;
             const currentEmail = document.getElementById('email').value;
@@ -808,14 +635,11 @@ const nameGenerator = {
                 const username = currentEmail.split('@')[0];
                 const newDomain = schools[schoolId].domain;
                 document.getElementById('email').value = `${username}@${newDomain}`;
-                log(`Updated email domain to ${newDomain}`, 'info');
             } else if (!currentEmail) {
-                // 如果邮箱为空，则生成一个新的
-                 document.getElementById('email').value = generateEmail();
+                document.getElementById('email').value = generateEmail();
             }
         }
         
-        // 初始化默认值
         function initializeDefaults() {
             const name = nameGenerator.generate();
             document.getElementById('firstName').value = name.firstName;
@@ -823,317 +647,196 @@ const nameGenerator = {
             document.getElementById('email').value = generateEmail();
             document.getElementById('birthDate').value = generateBirthDate();
             
-            // 初始应用 i18n
-            setLanguage({ target: document.querySelector('.lang-btn.active') }, currentLanguage);
-            
-            log(`Initialized with: ${name.firstName} ${name.lastName}`, 'debug');
+            log(`初始化: ${name.firstName} ${name.lastName}`, 'debug');
         }
         
-        // 解析URL
         function parseUrl(url) {
             try {
                 const match = url.match(/verificationId=([a-f0-9]+)/i);
-                if (match && match[1]) {
-                    return match[1];
-                }
-                throw new Error(t('invalidUrlFormat'));
+                if (match && match[1]) return match[1];
+                throw new Error('无效的验证ID格式');
             } catch (error) {
                 log(error.message, 'error');
                 return null;
             }
         }
         
-        // 获取Logo URL
         function getLogoUrl() {
             const customUrl = document.getElementById('customLogoUrl').value.trim();
-            if (customUrl) {
-                log(`Using custom logo URL: ${customUrl}`, 'debug');
-                return customUrl;
-            }
+            if (customUrl) return customUrl;
             
             const schoolId = document.getElementById('schoolId').value;
-            const school = schools[schoolId];
-            return school.logo;
+            return schools[schoolId].logo;
         }
-        
-/**
- * 生成学生证 (根据图片重新布局)
- * @param {string} firstName 学生的名字
- * @param {string} lastName 学生的姓氏
- * @param {string} schoolName 学校名称
- */
-async function generateCard(firstName, lastName, schoolName) {
-    log(t('generatingCard'), 'info');
-    
-    const canvas = document.getElementById('studentCard');
-    if (!canvas) {
-        log('Canvas element "studentCard" not found.', 'error');
-        return;
-    }
-    const ctx = canvas.getContext('2d');
-    
-    canvas.width = 856;
-    canvas.height = 540;
-    
-    // --- 1. 绘制新背景 ---
-    // 整体浅灰底色
-    ctx.fillStyle = '#F0F2F5';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // 红色页眉
-    const headerHeight = 120;
-    ctx.fillStyle = '#D9232D'; // 图片中的红色
-    ctx.fillRect(0, 0, canvas.width, headerHeight);
-    
-    // 白色内容区
-    const bodyY = headerHeight;
-    const bodyHeight = 350;
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, bodyY, canvas.width, bodyHeight);
-    
-    const footerY = bodyY + bodyHeight; // 500
-    
-    // --- 2. Logo 和页眉文本 ---
-    let logo, photo; 
 
-    try {
-        // --- NEW: 加载图片 ---
-        const logoUrl = getLogoUrl();
-        // 改进: 随机生成照片 URL，使用更大的范围
-        const randomAvatarId = Math.floor(Math.random() * 150) + 1; 
-        const photoUrl = `https://ps.iaw.pp.ua/avatars/men/${randomAvatarId}.jpg`;
-
-        const results = await Promise.allSettled([
-            loadImage(logoUrl),
-            loadImage(photoUrl)
-        ]);
-
-        if (results[0].status === 'fulfilled') {
-            logo = results[0].value;
-        } else {
-            log(`Logo loading failed: ${results[0].reason.message}`, 'warning');
-        }
-        
-        if (results[1].status === 'fulfilled') {
-            photo = results[1].value;
-        } else {
-            log(`Photo loading failed: ${results[1].reason.message}`, 'warning');
-        }
-        
-        // --- 绘制逻辑 ---
-
-        // 2.1 绘制 Logo (左上角)
-        let textX = 30; // 默认文本 X 坐标 (无 logo)
-        const logoSize = 80;
-        const logoMargin = (headerHeight - logoSize) / 2;
-        const logoX = 30;
-        const logoY = logoMargin;
-        
-        if (logo) {
-            textX = logoX + logoSize + 20; 
+        // 修复: 确保学生证信息与表单完全一致
+        async function generateCard(firstName, lastName, schoolName) {
+            log('正在生成学生证...', 'info');
             
-            // 绘制圆形裁切
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, Math.PI * 2, true);
-            ctx.closePath();
-            ctx.clip(); 
-            ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
-            ctx.restore(); 
-        } else {
-            log('Logo image not loaded, using text only.', 'info');
-        }
-        
-        // 2.2 绘制学校名称
-        let y = 50; 
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 30px "Segoe UI", Arial, sans-serif';
-        ctx.textAlign = 'left';
-        
-        const words = schoolName.split(' ');
-        let line = '';
-        const lineMargin = 38;
-        const textMaxWidth = canvas.width - textX - 30; 
-
-        for (let n = 0; n < words.length; n++) {
-            let testLine = line + words[n] + ' ';
-            let metrics = ctx.measureText(testLine);
-            let testWidth = metrics.width;
-            if (testWidth > textMaxWidth && n > 0) {
-                ctx.fillText(line, textX, y);
-                line = words[n] + ' ';
-                y += lineMargin;
-            } else {
-                line = testLine;
+            const canvas = document.getElementById('studentCard');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = 856;
+            canvas.height = 540;
+            
+            // 背景
+            ctx.fillStyle = '#F0F2F5';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const headerHeight = 120;
+            ctx.fillStyle = '#D9232D';
+            ctx.fillRect(0, 0, canvas.width, headerHeight);
+            
+            const bodyY = headerHeight;
+            const bodyHeight = 350;
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, bodyY, canvas.width, bodyHeight);
+            
+            const footerY = bodyY + bodyHeight;
+            
+            // Logo 和文本
+            let logo, photo;
+            
+            try {
+                const logoUrl = getLogoUrl();
+                // 修复: 使用更稳定的头像源
+                const randomAvatarId = Math.floor(Math.random() * 70) + 1;
+                const photoUrl = `https://ps.iaw.pp.ua/avatars/men/${randomAvatarId}.jpg`;
+                
+                const results = await Promise.allSettled([
+                    loadImage(logoUrl),
+                    loadImage(photoUrl)
+                ]);
+                
+                if (results[0].status === 'fulfilled') logo = results[0].value;
+                if (results[1].status === 'fulfilled') photo = results[1].value;
+                
+                let textX = 30;
+                const logoSize = 80;
+                const logoMargin = (headerHeight - logoSize) / 2;
+                const logoX = 30;
+                const logoY = logoMargin;
+                
+                if (logo) {
+                    textX = logoX + logoSize + 20;
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, Math.PI * 2);
+                    ctx.closePath();
+                    ctx.clip();
+                    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+                    ctx.restore();
+                }
+                
+                let y = 50;
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 30px "Segoe UI", Arial, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(schoolName, textX, y);
+                
+                ctx.font = '24px "Segoe UI", Arial, sans-serif';
+                ctx.fillText('STUDENT ID CARD', textX, y + 40);
+                
+                // 照片
+                const photoX = 40;
+                const photoY = bodyY + 30;
+                const photoRectSize = 220;
+                
+                if (photo) {
+                    ctx.save();
+                    roundRect(ctx, photoX, photoY, photoRectSize, photoRectSize, 15);
+                    ctx.clip();
+                    ctx.drawImage(photo, photoX, photoY, photoRectSize, photoRectSize);
+                    ctx.restore();
+                } else {
+                    ctx.fillStyle = '#E0E0E0';
+                    roundRect(ctx, photoX, photoY, photoRectSize, photoRectSize, 15);
+                }
+                
+                // 学生信息 - 修复: 使用表单中的真实数据
+                const infoX = photoX + photoRectSize + 40;
+                let infoY = bodyY + 60;
+                
+                const birthDate = document.getElementById('birthDate').value; // 获取表单生日
+                
+                drawInfoField(ctx, 'NAME', `${firstName} ${lastName}`, infoX, infoY);
+                infoY += 80;
+                
+                // 修复: 生成一致的学生ID (基于姓名)
+                const studentId = 'INT' + (firstName + lastName).split('').reduce((a,c) => a + c.charCodeAt(0), 0) % 900000 + 100000;
+                drawInfoField(ctx, 'STUDENT ID', studentId, infoX, infoY);
+                infoY += 80;
+                
+                drawInfoField(ctx, 'FACULTY', 'Faculty of Medicine', infoX, infoY);
+                
+                // 页脚 - 修复: 使用表单中的生日作为签发日期
+                const dateY = footerY + 30;
+                
+                ctx.fillStyle = '#555';
+                ctx.font = '24px "Segoe UI", Arial, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText('ISSUE', 40, dateY);
+                ctx.fillStyle = 'black';
+                ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
+                ctx.fillText(birthDate, 40, dateY + 35); // 使用表单生日
+                
+                // 计算有效期 (4年后)
+                const issueDate = new Date(birthDate);
+                const validDate = new Date(issueDate);
+                validDate.setFullYear(validDate.getFullYear() + 4);
+                const validDateStr = validDate.toISOString().split('T')[0];
+                
+                ctx.fillStyle = '#555';
+                ctx.font = '24px "Segoe UI", Arial, sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText('VALID', canvas.width - 40, dateY);
+                ctx.fillStyle = 'black';
+                ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
+                ctx.fillText(validDateStr, canvas.width - 40, dateY + 35);
+                
+                log('学生证生成成功', 'success');
+                
+            } catch (error) {
+                log(`生成学生证时出错: ${error.message}`, 'error');
             }
         }
-        ctx.fillText(line, textX, y);
-        
-        // 2.3 绘制标题 ("STUDENT ID CARD")
-        ctx.font = '24px "Segoe UI", Arial, sans-serif';
-        ctx.fillText('STUDENT ID CARD', textX, y + 40);
-        
-        
-        // --- 3. 内容区 ---
-        
-        // 3.1 绘制照片或占位符
-        const photoX = 40;
-        const photoY = bodyY + 30;
-        const photoRectSize = 220;
-        
-        if (photo) {
-            ctx.save();
-            roundRect(ctx, photoX, photoY, photoRectSize, photoRectSize, 15); 
-            ctx.clip(); 
-            ctx.drawImage(photo, photoX, photoY, photoRectSize, photoRectSize);
-            ctx.restore(); 
-        } else {
-            ctx.fillStyle = '#E0E0E0'; 
-            roundRect(ctx, photoX, photoY, photoRectSize, photoRectSize, 15); 
+
+        function drawInfoField(ctx, label, value, x, y) {
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#888';
+            ctx.font = '24px "Segoe UI", Arial, sans-serif';
+            ctx.fillText(label, x, y);
+            
+            ctx.fillStyle = 'black';
+            ctx.font = 'bold 30px "Segoe UI", Arial, sans-serif';
+            ctx.fillText(value, x, y + 35);
+        }
+
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function loadImage(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error(`Failed to load: ${src}`));
+                img.src = src;
+            });
         }
         
-        // 3.2 绘制学生信息
-        const infoX = photoX + photoRectSize + 40;
-        let infoY = bodyY + 60;
-        
-        // NAME (来自函数参数)
-        drawInfoField(ctx, 'NAME', `${firstName} ${lastName}`, infoX, infoY);
-        infoY += 80;
-        
-        // STUDENT ID(统一硬编码值)
-        drawInfoField(ctx, 'STUDENT ID', 'INT522957', infoX, infoY);
-        infoY += 80;
-        
-        // FACULTY (统一硬编码值)
-        drawInfoField(ctx, 'FACULTY', 'Faculty of Medicine', infoX, infoY);
-        
-        
-        // --- 4. 页脚日期 ---
-        const dateY = footerY + 30; 
-        
-        // ISSUE 
-        ctx.fillStyle = '#555';
-        ctx.font = '24px "Segoe UI", Arial, sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText('ISSUE', 40, dateY);
-        ctx.fillStyle = 'black';
-        ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
-        ctx.fillText('2025-10-20', 40, dateY + 35); // 统一使用 2025-10-20
-        
-        // VALID
-        ctx.fillStyle = '#555';
-        ctx.font = '24px "Segoe UI", Arial, sans-serif';
-        ctx.textAlign = 'right';
-        ctx.fillText('VALID', canvas.width - 40, dateY);
-        ctx.fillStyle = 'black';
-        ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
-        ctx.fillText('2029-10-21', canvas.width - 40, dateY + 35); // 统一使用 2029-10-31
-        
-        log(t('cardGenerated'), 'success');
-        
-    } catch (error) {
-        log(`General card generation error: ${error.message}`, 'error');
-        console.error(error);
-        
-        // --- Fallback 渲染 ---
-        const bodyY = headerHeight;
-        const photoX = 40;
-        const photoY = bodyY + 30;
-        const photoRectSize = 220;
-        const infoX = photoX + photoRectSize + 40;
-        let infoY = bodyY + 60;
-
-        // 绘制页眉文本 (无 logo)
-        let y = 50;
-        const textX = 30;
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 30px "Segoe UI", Arial, sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText(schoolName, textX, y);
-        ctx.font = '24px "Segoe UI", Arial, sans-serif';
-        ctx.fillText('STUDENT ID CARD', textX, y + 40);
-        
-        // 绘制照片占位符
-        ctx.fillStyle = '#E0E0E0';
-        roundRect(ctx, photoX, photoY, photoRectSize, photoRectSize, 15);
-        
-        // 绘制学生信息
-        drawInfoField(ctx, 'NAME', `${firstName} ${lastName}`, infoX, infoY);
-        infoY += 80;
-        drawInfoField(ctx, 'STUDENT ID', 'INT522957', infoX, infoY);
-        infoY += 80;
-        drawInfoField(ctx, 'FACULTY', 'Faculty of Medicine', infoX, infoY);
-        
-        // 绘制页脚
-        const dateY = footerY + 30; 
-        ctx.fillStyle = '#555';
-        ctx.font = '24px "Segoe UI", Arial, sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText('ISSUE', 40, dateY);
-        ctx.fillStyle = 'black';
-        ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
-        ctx.fillText('2025-10-20', 40, dateY + 35);
-        
-        ctx.fillStyle = '#555';
-        ctx.font = '24px "Segoe UI", Arial, sans-serif';
-        ctx.textAlign = 'right';
-        ctx.fillText('VALID', canvas.width - 40, dateY);
-        ctx.fillStyle = 'black';
-        ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
-        ctx.fillText('2029-10-31', canvas.width - 40, dateY + 35);
-    }
-}
-
-/**
- * 辅助函数：绘制信息字段 (标签+值)
- */
-function drawInfoField(ctx, label, value, x, y) {
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#888'; 
-    ctx.font = '24px "Segoe UI", Arial, sans-serif';
-    ctx.fillText(label, x, y);
-    
-    ctx.fillStyle = 'black';
-    ctx.font = 'bold 30px "Segoe UI", Arial, sans-serif';
-    ctx.fillText(value, x, y + 35);
-}
-
-
-/**
- * 绘制圆角矩形 (用于照片占位符)
- */
-function roundRect(ctx, x, y, width, height, radius) {
-    ctx.beginPath();
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + width - radius, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-    ctx.lineTo(x + width, y + height - radius);
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    ctx.lineTo(x + radius, y + height);
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-    ctx.lineTo(x, y + radius);
-    ctx.quadraticCurveTo(x, y, x + radius, y);
-    ctx.closePath();
-    
-    ctx.fill();
-}
-
-/**
- * 异步加载图片
- * @param {string} src 图片 URL
- * @returns {Promise<Image>}
- */
-function loadImage(src) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous'; 
-        img.onload = () => resolve(img);
-        img.onerror = (e) => reject(new Error(`Failed to load image: ${src}`));
-        img.src = src;
-    });
-}
-        
-        // 验证码相关函数
         function showCaptchaModal() {
             return new Promise((resolve, reject) => {
                 captchaResolve = resolve;
@@ -1143,12 +846,11 @@ function loadImage(src) {
                 const needsTurnstile = window.CONFIG.turnstile.sitekey;
                 
                 if (!needsHcaptcha && !needsTurnstile) {
-                    log('No captcha configured, skipping verification', 'debug');
+                    log('未配置验证码,跳过验证', 'debug');
                     resolve({ hcaptcha: null, turnstile: null });
                     return;
                 }
 
-                // 动态加载 hCaptcha/Turnstile API
                 if (needsHcaptcha && !window.hcaptcha) {
                     const script = document.createElement('script');
                     script.src = 'https://js.hcaptcha.com/1/api.js';
@@ -1164,21 +866,14 @@ function loadImage(src) {
                     document.head.appendChild(script);
                 }
                 
-                // 重置tokens
                 captchaTokens = { hcaptcha: null, turnstile: null };
-                
-                // 显示模态框
                 document.getElementById('captchaModal').classList.add('show');
-                
-                // 清空容器
                 document.getElementById('hcaptcha-container').innerHTML = '';
                 document.getElementById('turnstile-container').innerHTML = '';
                 
-                updateCaptchaStatus(t('loadingCaptcha'));
+                updateCaptchaStatus('正在加载验证码...');
                 
-                // 开始流程
                 if (needsHcaptcha) {
-                    // 等待 hCaptcha API 加载
                     const checkHcaptchaLoaded = setInterval(() => {
                         if (window.hcaptcha) {
                             clearInterval(checkHcaptchaLoaded);
@@ -1192,8 +887,8 @@ function loadImage(src) {
         }
 
         function renderHcaptcha() {
-            log('Loading hCaptcha...', 'info');
-            updateCaptchaTitle(t('captchaStep1'));
+            log('正在加载 hCaptcha...', 'info');
+            updateCaptchaTitle('请完成第一步验证 (hCaptcha)');
             updateCaptchaStatus('');
             
             document.getElementById('hcaptcha-container').style.display = 'block';
@@ -1204,17 +899,17 @@ function loadImage(src) {
                     sitekey: window.CONFIG.hcaptcha.sitekey,
                     callback: (token) => {
                         captchaTokens.hcaptcha = token;
-                        log('hCaptcha verified successfully', 'success');
+                        log('hCaptcha 验证成功', 'success');
                         onHcaptchaComplete();
                     },
                     'error-callback': () => {
-                        log('hCaptcha error', 'error');
+                        log('hCaptcha 验证失败', 'error');
                         if (captchaReject) captchaReject(new Error('hCaptcha verification failed'));
                         closeCaptchaModal();
                     }
                 });
             } catch (error) {
-                log(`Failed to render hCaptcha: ${error.message}`, 'error');
+                log(`hCaptcha 渲染失败: ${error.message}`, 'error');
                 if (captchaReject) captchaReject(error);
                 closeCaptchaModal();
             }
@@ -1224,7 +919,7 @@ function loadImage(src) {
             const needsTurnstile = window.CONFIG.turnstile.sitekey;
             
             if (needsTurnstile) {
-                log('hCaptcha complete, loading Turnstile...', 'info');
+                log('hCaptcha 完成,正在加载 Turnstile...', 'info');
                 loadTurnstile();
             } else {
                 completeCaptchaVerification();
@@ -1237,13 +932,12 @@ function loadImage(src) {
                 return;
             }
             
-            log('Loading Turnstile...', 'info');
-            updateCaptchaTitle(t('captchaStep2'));
+            log('正在加载 Turnstile...', 'info');
+            updateCaptchaTitle('请完成第二步验证 (Turnstile)');
             updateCaptchaStatus('');
             
             document.getElementById('turnstile-container').style.display = 'block';
 
-            // 等待 Turnstile API 加载
             const checkTurnstileLoaded = setInterval(() => {
                 if (window.turnstile) {
                     clearInterval(checkTurnstileLoaded);
@@ -1252,17 +946,17 @@ function loadImage(src) {
                             sitekey: window.CONFIG.turnstile.sitekey,
                             callback: (token) => {
                                 captchaTokens.turnstile = token;
-                                log('Turnstile verified successfully', 'success');
+                                log('Turnstile 验证成功', 'success');
                                 completeCaptchaVerification();
                             },
                             'error-callback': () => {
-                                log('Turnstile error', 'error');
+                                log('Turnstile 验证失败', 'error');
                                 if (captchaReject) captchaReject(new Error('Turnstile verification failed'));
                                 closeCaptchaModal();
                             }
                         });
                     } catch (error) {
-                        log(`Failed to render Turnstile: ${error.message}`, 'error');
+                        log(`Turnstile 渲染失败: ${error.message}`, 'error');
                         if (captchaReject) captchaReject(error);
                         closeCaptchaModal();
                     }
@@ -1271,8 +965,8 @@ function loadImage(src) {
         }
         
         function completeCaptchaVerification() {
-            log('All captchas verified successfully', 'success');
-            updateCaptchaStatus(t('captchaComplete'));
+            log('所有验证码验证成功', 'success');
+            updateCaptchaStatus('验证完成!');
             
             setTimeout(() => {
                 document.getElementById('captchaModal').classList.remove('show');
@@ -1293,29 +987,25 @@ function loadImage(src) {
         function closeCaptchaModal() {
             document.getElementById('captchaModal').classList.remove('show');
             captchaTokens = { hcaptcha: null, turnstile: null };
-            if (captchaReject) captchaReject(new Error("Captcha modal closed by user."));
+            if (captchaReject) captchaReject(new Error("用户关闭验证码窗口"));
             captchaResolve = null;
             captchaReject = null;
         }
         
-        // 显示模态框
         function showModal() {
             document.getElementById('previewModal').classList.add('show');
         }
         
-        // 关闭模态框
         function closeModal() {
             document.getElementById('previewModal').classList.remove('show');
         }
         
-        // 显示成功模态框
         function showSuccessModal(redirectUrl) {
             currentRedirectUrl = redirectUrl;
             document.getElementById('successRedirectUrl').textContent = redirectUrl;
             document.getElementById('successModal').classList.add('show');
         }
         
-        // 跳转到成功页面
         function redirectToSuccess() {
             if (currentRedirectUrl) {
                 window.open(currentRedirectUrl, '_blank');
@@ -1323,92 +1013,82 @@ function loadImage(src) {
             document.getElementById('successModal').classList.remove('show');
         }
         
-        // 开始验证
         async function startVerification() {
             const urlInput = document.getElementById('urlInput').value.trim();
             
             if (!urlInput) {
-                log(t('pleaseEnterUrl'), 'error');
+                log('请输入验证URL', 'error');
                 return;
             }
             
-            // 解析URL
             const verificationId = parseUrl(urlInput);
-            if (!verificationId) {
-                return;
-            }
+            if (!verificationId) return;
             
             currentVerificationId = verificationId;
-            log(`Extracted verification ID: ${verificationId}`, 'success');
+            log(`提取到验证ID: ${verificationId}`, 'success');
             
-            // 获取当前表单值
             const firstName = document.getElementById('firstName').value;
             const lastName = document.getElementById('lastName').value;
             const schoolId = document.getElementById('schoolId').value;
             const school = schools[schoolId];
 
             if (!firstName || !lastName || !school) {
-                log('Please ensure all required fields (Name, School) are filled.', 'error');
+                log('请确保所有必填项(姓名、学校)已填写', 'error');
                 return;
             }
             
-            log(`Student: ${firstName} ${lastName}`, 'info');
-            log(`School: ${school.name}`, 'info');
+            log(`学生: ${firstName} ${lastName}`, 'info');
+            log(`学校: ${school.name}`, 'info');
 
-            // 生成学生证
             await generateCard(firstName, lastName, school.name);
-            
-            // 显示预览模态框
             showModal();
         }
         
-        // 确认并提交
         async function confirmAndSubmit() {
             closeModal();
             
             try {
-                // 显示验证码
                 const tokens = await showCaptchaModal();
                 captchaTokens = tokens;
-                
-                // 提交验证
                 await submitVerification();
             } catch (error) {
-                log(`Process interrupted or failed: ${error.message}`, 'error');
-                // 确保按钮状态被重置
+                log(`流程中断或失败: ${error.message}`, 'error');
                 document.getElementById('verifyButton').disabled = false;
-                document.getElementById('verifyButton').innerHTML = `<span data-i18n="startVerify">${t('startVerify')}</span>`;
+                document.getElementById('verifyButton').innerHTML = '<span>开始验证</span>';
             }
         }
         
-        // 提交验证
         async function submitVerification() {
             const button = document.getElementById('verifyButton');
             button.disabled = true;
-            button.innerHTML = `<span class="loading-spinner white"></span>${t('verifying')}`;
+            button.innerHTML = '<span class="loading-spinner white"></span>验证中...';
             
-            log('Starting verification process...', 'info');
+            log('开始验证流程...', 'info');
             
             try {
                 const canvas = document.getElementById('studentCard');
                 const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
                 
-                // 检查文件大小
                 if (blob.size > window.CONFIG.maxFileSize) {
                     const sizeMB = (blob.size / (1024 * 1024)).toFixed(2);
-                    throw new Error(`File size (${sizeMB}MB) exceeds 1MB limit`);
+                    throw new Error(`文件大小 (${sizeMB}MB) 超过 1MB 限制`);
                 }
+                
+                const firstName = document.getElementById('firstName').value;
+                const lastName = document.getElementById('lastName').value;
                 
                 const formData = new FormData();
                 formData.append('verificationId', currentVerificationId);
-                formData.append('firstName', document.getElementById('firstName').value);
-                formData.append('lastName', document.getElementById('lastName').value);
+                formData.append('firstName', firstName);
+                formData.append('lastName', lastName);
                 formData.append('email', document.getElementById('email').value);
                 formData.append('birthDate', document.getElementById('birthDate').value);
                 formData.append('schoolId', document.getElementById('schoolId').value);
-                formData.append('studentCard', blob, 'student_id_card.png');
                 
-                // 添加验证码token
+                // 修复: 使用与Worker一致的文件名
+                const filename = `International-ID-${firstName}-${lastName}-Front.png`;
+                formData.append('studentCard', blob, filename);
+                
                 if (captchaTokens.hcaptcha) {
                     formData.append('hcaptchaToken', captchaTokens.hcaptcha);
                 }
@@ -1416,7 +1096,7 @@ function loadImage(src) {
                     formData.append('turnstileToken', captchaTokens.turnstile);
                 }
                 
-                log('Sending request to server...', 'debug');
+                log('正在发送请求到服务器...', 'debug');
                 
                 const workerUrl = window.location.hostname === 'localhost' 
                     ? 'http://localhost:8787' 
@@ -1429,75 +1109,54 @@ function loadImage(src) {
                 
                 const result = await response.json();
                 
-                // 显示服务器返回的日志
                 if (result.logs && result.logs.length > 0) {
-                    log('=== Server Logs ===', 'info');
+                    log('=== 服务器日志 ===', 'info');
                     result.logs.forEach(logItem => {
                         log(logItem.message, logItem.type || 'debug');
                     });
-                    log('=== End Server Logs ===', 'info');
+                    log('=== 服务器日志结束 ===', 'info');
                 }
                 
                 if (result.success) {
                     const redirectUrl = result.redirectUrl || 'https://one.google.com/ai-student';
-                    log(t('verificationSuccess') + redirectUrl, 'success');
-                    
-                    // 显示成功提示
+                    log(`✅ 验证成功! 跳转URL: ${redirectUrl}`, 'success');
                     showSuccessModal(redirectUrl);
                 } else {
-                    log(t('verificationFailed') + (result.message || 'Unknown error'), 'error');
+                    log(`❌ 验证失败: ${result.message || '未知错误'}`, 'error');
                 }
                 
-                // 重置验证码token
                 captchaTokens = { hcaptcha: null, turnstile: null };
                 
             } catch (error) {
-                log(`Fatal error: ${error.message}`, 'error');
+                log(`致命错误: ${error.message}`, 'error');
                 console.error(error);
             } finally {
                 button.disabled = false;
-                button.innerHTML = `<span data-i18n="startVerify">${t('startVerify')}</span>`;
+                button.innerHTML = '<span>开始验证</span>';
             }
         }
         
-        // 初始化
         window.onload = function() {
-            log('System initialized', 'success');
+            log('系统初始化完成', 'success');
             
             if (window.CONFIG.hcaptcha.sitekey) {
-                log('hCaptcha enabled', 'info');
+                log('hCaptcha 已启用', 'info');
             } else {
-                log('hCaptcha disabled', 'debug');
+                log('hCaptcha 未启用', 'debug');
             }
             
             if (window.CONFIG.turnstile.sitekey) {
-                log('Turnstile enabled', 'info');
+                log('Turnstile 已启用', 'info');
             } else {
-                log('Turnstile disabled', 'debug');
+                log('Turnstile 未启用', 'debug');
             }
             
-            log('Ready to process SheerID verification URLs', 'info');
-            
-            // 初始化默认值
+            log('准备处理 SheerID 验证URL', 'info');
             initializeDefaults();
             
             const urlInput = document.getElementById('urlInput');
-            
-            // 监听Enter键
             urlInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    startVerification();
-                }
-            });
-            
-            // 监听粘贴事件
-            urlInput.addEventListener('paste', function(e) {
-                setTimeout(() => {
-                    const pastedText = e.target.value;
-                    if (pastedText.includes('verificationId=')) {
-                        log('Detected verification URL paste, processing...', 'info');
-                    }
-                }, 100);
+                if (e.key === 'Enter') startVerification();
             });
         };
     </script>
