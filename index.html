@@ -969,9 +969,9 @@ async function generateCard(firstName, lastName, schoolName) {
         }
         ctx.fillText(line, textX, y);
         
-        // 2.3 绘制标题 ("国际学生证")
+        // 2.3 绘制标题 ("international student ID card")
         ctx.font = '24px "Segoe UI", Arial, sans-serif';
-        ctx.fillText('国际学生证', textX, y + 40);
+        ctx.fillText('international student ID card', textX, y + 40);
         
         
         // --- 3. 内容区 ---
@@ -996,38 +996,38 @@ async function generateCard(firstName, lastName, schoolName) {
         const infoX = photoX + photoRectSize + 40;
         let infoY = bodyY + 60;
         
-        // 姓名 (来自函数参数)
-        drawInfoField(ctx, '姓名', `${firstName} ${lastName}`, infoX, infoY);
+        // NAME (来自函数参数)
+        drawInfoField(ctx, 'NAME', `${firstName} ${lastName}`, infoX, infoY);
         infoY += 80;
         
-        // 学号 (统一硬编码值)
-        drawInfoField(ctx, '学号', 'INT522957', infoX, infoY);
+        // Student id (统一硬编码值)
+        drawInfoField(ctx, 'Student id', 'INT5225957', infoX, infoY);
         infoY += 80;
         
-        // 院系/专业 (统一硬编码值)
-        drawInfoField(ctx, '院系/专业', 'Faculty of Medicine', infoX, infoY);
+        // FACULTY (统一硬编码值)
+        drawInfoField(ctx, 'FACULTY', 'Faculty of Medicine', infoX, infoY);
         
         
         // --- 4. 页脚日期 ---
         const dateY = footerY + 30; 
         
-        // 签发日期 
+        // ISSUE 
         ctx.fillStyle = '#555';
         ctx.font = '24px "Segoe UI", Arial, sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText('签发日期', 40, dateY);
+        ctx.fillText('ISSUE', 40, dateY);
         ctx.fillStyle = 'black';
         ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
         ctx.fillText('2025-10-20', 40, dateY + 35); // 统一使用 2025-10-20
         
-        // 有效期至
+        // VALID
         ctx.fillStyle = '#555';
         ctx.font = '24px "Segoe UI", Arial, sans-serif';
         ctx.textAlign = 'right';
-        ctx.fillText('有效期至', canvas.width - 40, dateY);
+        ctx.fillText('VALID', canvas.width - 40, dateY);
         ctx.fillStyle = 'black';
         ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
-        ctx.fillText('2029-10-31', canvas.width - 40, dateY + 35); // 统一使用 2029-10-31
+        ctx.fillText('2029-10-21', canvas.width - 40, dateY + 35); // 统一使用 2029-10-31
         
         log(t('cardGenerated'), 'success');
         
@@ -1051,25 +1051,25 @@ async function generateCard(firstName, lastName, schoolName) {
         ctx.textAlign = 'left';
         ctx.fillText(schoolName, textX, y);
         ctx.font = '24px "Segoe UI", Arial, sans-serif';
-        ctx.fillText('国际学生证', textX, y + 40);
+        ctx.fillText('international student ID card', textX, y + 40);
         
         // 绘制照片占位符
         ctx.fillStyle = '#E0E0E0';
         roundRect(ctx, photoX, photoY, photoRectSize, photoRectSize, 15);
         
         // 绘制学生信息
-        drawInfoField(ctx, '姓名', `${firstName} ${lastName}`, infoX, infoY);
+        drawInfoField(ctx, 'NAME', `${firstName} ${lastName}`, infoX, infoY);
         infoY += 80;
-        drawInfoField(ctx, '学号', 'INT522957', infoX, infoY);
+        drawInfoField(ctx, 'Student id', 'INT522957', infoX, infoY);
         infoY += 80;
-        drawInfoField(ctx, '院系/专业', 'Faculty of Medicine', infoX, infoY);
+        drawInfoField(ctx, 'FACULTY', 'Faculty of Medicine', infoX, infoY);
         
         // 绘制页脚
         const dateY = footerY + 30; 
         ctx.fillStyle = '#555';
         ctx.font = '24px "Segoe UI", Arial, sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText('签发日期', 40, dateY);
+        ctx.fillText('ISSUE', 40, dateY);
         ctx.fillStyle = 'black';
         ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
         ctx.fillText('2025-10-20', 40, dateY + 35);
@@ -1077,7 +1077,7 @@ async function generateCard(firstName, lastName, schoolName) {
         ctx.fillStyle = '#555';
         ctx.font = '24px "Segoe UI", Arial, sans-serif';
         ctx.textAlign = 'right';
-        ctx.fillText('有效期至', canvas.width - 40, dateY);
+        ctx.fillText('VALID', canvas.width - 40, dateY);
         ctx.fillStyle = 'black';
         ctx.font = 'bold 26px "Segoe UI", Arial, sans-serif';
         ctx.fillText('2029-10-31', canvas.width - 40, dateY + 35);
